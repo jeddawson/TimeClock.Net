@@ -1,0 +1,14 @@
+Questions:
+
+
+How many hours did Employee X work this month/week/day?
+How many hours of overtime did employee X work this month/week/day?
+How many sick/vacation days did employee X take this month?
+How many sick/vacation days does employee X have left this year?
+Is today a holiday in department X?
+What pay should an employee in department X get when he exceeds the limit of normal pay?
+What Employees are working right now and how long have they been working?
+Does the employees in department X have paid breaks?
+What times during the last pay period did employee X punch in and what kind of pay was given?
+Are there any pending messages for employee X?
+How many hours did employees from department x work for department y?
