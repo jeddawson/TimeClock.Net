@@ -105,12 +105,13 @@ namespace TimeClock.Models
         public int MessageID { get; set; }
        // [Key, Column(Order=1)]
         public int EmployeeID { get; set; }
-        public DateTime DateViewed { get; set; }
+        public DateTime? DateViewed { get; set; }
     }
 
     public class Holiday
     {
         public int HolidayID { get; set; }
+        public string Description { get; set; }
         public DateTime Date { get; set; }
         public int Repeats { get; set; }
 
@@ -123,6 +124,7 @@ namespace TimeClock.Models
         public int PayTypeID { get; set; }
         public int DailyMax { get; set; }
         public int WeeklyMax { get; set; }
+        public string Description { get; set; }
         
         /* One to One */
         public virtual PayType NextPayType { get; set; }
@@ -135,7 +137,7 @@ namespace TimeClock.Models
     {
         public int PunchID { get; set; }
         public DateTime InTime { get; set; }
-        public DateTime OutTime { get; set; }
+        public DateTime? OutTime { get; set; }
         public int DepartmentID { get; set; }
         public string EmployeeID { get; set; }
         public int PunchTypeID { get; set; }
