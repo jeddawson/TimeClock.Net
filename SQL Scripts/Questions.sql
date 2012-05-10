@@ -8,7 +8,7 @@ WHERE L.TimecardID = (
 	WHERE Tc.EmployeeID = (
 		SELECT E.EmployeeID
 		FROM timeclock.dbo.Employee AS E
-		WHERE E.EmployeeID = 1234
+		WHERE E.EmployeeID = '10-MKRINGELBACH'
 	)
 )
 GO
@@ -34,7 +34,7 @@ WHERE L.TimecardID = (
 	WHERE Tc.EmployeeID = (
 		SELECT E.EmployeeID
 		FROM timeclock.dbo.Employee AS E
-		WHERE E.EmployeeID = 1234
+		WHERE E.EmployeeID = '10-MKRINGELBACH'
 		)
 	) 
 AND L.PayTypeID = (
@@ -52,7 +52,7 @@ WHERE P.PunchTypeID IN (
 	FROM PunchType AS PT
 	WHERE PT.Description = 'Sick'
 	) AND
-	P.EmployeeID = 1234
+	P.EmployeeID = '10-MKRINGELBACH'
 GO
 
 --SELECT PT.Description AS NextPayScale
