@@ -84,6 +84,7 @@ namespace TimeClock.Models
 
         /* Many to Many */
         public virtual ICollection<Holiday> Holidays { get; set; }
+        public virtual ICollection<PayType> PayTypes { get; set; }
     }
 
     public class Message
@@ -131,6 +132,7 @@ namespace TimeClock.Models
 
         /* One to Many */
         public virtual ICollection<Line> Lines { get; set; }
+        public virtual ICollection<Department> Departments { get; set; }
     }
 
     public class Punch
