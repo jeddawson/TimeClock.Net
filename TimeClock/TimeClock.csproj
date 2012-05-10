@@ -142,6 +142,15 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201205080617411_InitialCreate.cs" />
+    <Compile Include="Migrations\201205080617411_InitialCreate.Designer.cs">
+      <DependentUpon>201205080617411_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201205100511289_Latest.cs" />
+    <Compile Include="Migrations\201205100511289_Latest.Designer.cs">
+      <DependentUpon>201205100511289_Latest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\TimeClockModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
