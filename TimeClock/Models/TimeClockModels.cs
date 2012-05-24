@@ -163,15 +163,19 @@ namespace TimeClock.Models
         public int LineID { get; set; }
         public int PunchID { get; set; }
         public int TimecardID { get; set; }
-        public int PayTypeID { get; set; }
+        
         public DateTime SplitStart { get; set; }
         public DateTime SplitEnd { get; set; }
+      
+        public int PayTypeID { get; set; }
+        [ForeignKey("PayTypeID")]
+        public virtual PayType PayType { get; set; }
     }
 
     public class Timecard
     {
         public int TimecardID { get; set; }
-        public int EmployeeID { get; set; }
+        public string EmployeeID { get; set; }
         public DateTime PayPeriod { get; set; }
 
         /* One to Many */
