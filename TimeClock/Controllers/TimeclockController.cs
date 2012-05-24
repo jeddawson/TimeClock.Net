@@ -17,9 +17,9 @@ namespace TimeClock.Controllers
         {
             return View();
         }
-
+         /*
           /* Looks up the employees current status
-           */
+           *
         public ActionResult Status(string id)
         {
              using (var db = new TimeClockContext())
@@ -63,6 +63,6 @@ namespace TimeClock.Controllers
                   return PartialView(timecard);
              }
         }
-
+         */
     }
 }
