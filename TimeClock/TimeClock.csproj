@@ -151,6 +151,10 @@
     <Compile Include="Migrations\201205100511289_Latest.Designer.cs">
       <DependentUpon>201205100511289_Latest.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201205250444595_modLineAndTimecard.cs" />
+    <Compile Include="Migrations\201205250444595_modLineAndTimecard.Designer.cs">
+      <DependentUpon>201205250444595_modLineAndTimecard.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\TimeClockModels.cs" />
