@@ -10,7 +10,7 @@ namespace TimeClock.Migrations
             DropForeignKey("PayTypeDepartment", "Department_DepartmentID", "Department");
             DropIndex("PayTypeDepartment", new[] { "PayType_PayTypeID" });
             DropIndex("PayTypeDepartment", new[] { "Department_DepartmentID" });
-            RenameColumn(table: "Timecard", name: "Employee_EmployeeID", newName: "EmployeeID");
+            RenameColumn(table: "Timecard", name: "Employee_EmployeeID", newName: "Employee");
             CreateTable(
                 "DepartmentPayType",
                 c => new

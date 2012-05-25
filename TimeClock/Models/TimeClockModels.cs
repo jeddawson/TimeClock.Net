@@ -55,6 +55,7 @@ namespace TimeClock.Models
         /* One to Many */
         public virtual ICollection<Punch> Punches { get; set; }
         public virtual ICollection<MessageViewed> ViewedMessages { get; set; }
+        [ForeignKey("EmployeeID")]
         public virtual ICollection<Timecard> Timecards { get; set; }
 
         /* Many to Many */
@@ -129,10 +130,6 @@ namespace TimeClock.Models
         
         /* One to One */
         public virtual PayType NextPayType { get; set; }
-
-        /* One to Many */
-        public virtual ICollection<Line> Lines { get; set; }
-        public virtual ICollection<Department> Departments { get; set; }
     }
 
     public class Punch
@@ -179,6 +176,7 @@ namespace TimeClock.Models
         public DateTime PayPeriod { get; set; }
 
         /* One to Many */
+        [ForeignKey("TimecardID")]
         public virtual ICollection<Line> Lines { get; set; }
     }
 

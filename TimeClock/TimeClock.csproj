@@ -155,6 +155,10 @@
     <Compile Include="Migrations\201205250444595_modLineAndTimecard.Designer.cs">
       <DependentUpon>201205250444595_modLineAndTimecard.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201205250520348_employeeIDResolution.cs" />
+    <Compile Include="Migrations\201205250520348_employeeIDResolution.Designer.cs">
+      <DependentUpon>201205250520348_employeeIDResolution.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\TimeClockModels.cs" />
