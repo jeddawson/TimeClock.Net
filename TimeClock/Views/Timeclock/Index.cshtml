@@ -3,14 +3,14 @@
 }
 
 <div class="row">
-<div class="four columns">
+<div class="three columns">
     <form class="custom">
     <fieldset>
         <h4>Time Clock</h4>
         <p>Select your name and enter your pin.</p>
-        <div class="row">Name</div>
         <div class="row">
-
+                <label>Name</label>
+                @Html.DropDownList("EmployeeID", (IEnumerable<SelectListItem>) ViewBag.EmpList, new { @style = "display: none;" })
         </div>
         <div class="row">
             <label>Pin</label>
@@ -23,7 +23,9 @@
     </fieldset>
     </form>
 </div>
-<div class="eight columns">
+<div class="nine columns">
+    <fieldset>
 
+    </fieldset>
 </div>
 </div>

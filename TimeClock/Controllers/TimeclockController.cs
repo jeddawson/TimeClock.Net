@@ -10,10 +10,16 @@ namespace TimeClock.Controllers
 {
     public class TimeclockController : Controller
     {
+        //Need this context for views that require persistent connection (when pulling data at time of view creation)
+        private TimeClockContext dbContext = new TimeClockContext();
 
         public ActionResult Index()
         {
+            
+            ViewBag.EmpList = new SelectList(dbContext.Employees.Where(e => e.Terminated == false).OrderBy(e => e.DepartmentID), "EmployeeID", "FirstName");
+                
             return View();
+           
         }
 
         /* Looks up the employees current status
@@ -22,7 +28,7 @@ namespace TimeClock.Controllers
         {
             using (var db = new TimeClockContext())
             {
-                PayPeriod payPeriod = LookupPayPeriod();
+                PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, 1);
 
                 var empPunches = db.Punches.Where(p => p.EmployeeID == id && p.InTime > payPeriod.Start && p.InTime < payPeriod.End);
                 if (empPunches.Count(p => p.OutTime == null) != 0)
@@ -40,7 +46,7 @@ namespace TimeClock.Controllers
             {
                 int lineNumberCounter = 1;
                 List<TimeCardView> timecard = new List<TimeCardView>();
-                PayPeriod payPeriod = LookupPayPeriod();
+                PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, 1);
 
                 var empTC = db.Timecards.SingleOrDefault(t => t.EmployeeID == id && t.PayPeriod == payPeriod.Start);
 
