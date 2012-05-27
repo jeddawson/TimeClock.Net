@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
+using System.Data.Objects;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -16,22 +18,36 @@ namespace TimeClock.Controllers
         //
         // GET: /Department/
 
-        public ActionResult Index()
+        public ViewResult Index(int start = 0, int itemsPerPage = 20, string orderBy = "DepartmentID", bool desc = false)
         {
-            return View(db.Departments.ToList());
+            ViewBag.Count = db.Departments.Count();
+            ViewBag.Start = start;
+            ViewBag.ItemsPerPage = itemsPerPage;
+            ViewBag.OrderBy = orderBy;
+            ViewBag.Desc = desc;
+
+            return View();
         }
 
         //
-        // GET: /Department/Details/5
+        // GET: /Department/GridData/?start=0&itemsPerPage=20&orderBy=DepartmentID&desc=true
 
-        public ActionResult Details(int id = 0)
+        public ActionResult GridData(int start = 0, int itemsPerPage = 20, string orderBy = "DepartmentID", bool desc = false)
+        {
+            Response.AppendHeader("X-Total-Row-Count", db.Departments.Count().ToString());
+            ObjectQuery<Department> departments = (db as IObjectContextAdapter).ObjectContext.CreateObjectSet<Department>();
+            departments = departments.OrderBy("it." + orderBy + (desc ? " desc" : ""));
+
+            return PartialView(departments.Skip(start).Take(itemsPerPage));
+        }
+
+        //
+        // GET: /Default5/RowData/5
+
+        public ActionResult RowData(int id)
         {
             Department department = db.Departments.Find(id);
-            if (department == null)
-            {
-                return HttpNotFound();
-            }
-            return View(department);
+            return PartialView("GridData", new Department[] { department });
         }
 
         //
@@ -39,7 +55,7 @@ namespace TimeClock.Controllers
 
         public ActionResult Create()
         {
-            return View();
+            return PartialView("Edit");
         }
 
         //
@@ -52,23 +68,19 @@ namespace TimeClock.Controllers
             {
                 db.Departments.Add(department);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return PartialView("GridData", new Department[] { department });
             }
 
-            return View(department);
+            return PartialView("Edit", department);
         }
 
         //
         // GET: /Department/Edit/5
 
-        public ActionResult Edit(int id = 0)
+        public ActionResult Edit(int id)
         {
             Department department = db.Departments.Find(id);
-            if (department == null)
-            {
-                return HttpNotFound();
-            }
-            return View(department);
+            return PartialView(department);
         }
 
         //
@@ -81,34 +93,21 @@ namespace TimeClock.Controllers
             {
                 db.Entry(department).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return PartialView("GridData", new Department[] { department });
             }
-            return View(department);
-        }
 
-        //
-        // GET: /Department/Delete/5
-
-        public ActionResult Delete(int id = 0)
-        {
-            Department department = db.Departments.Find(id);
-            if (department == null)
-            {
-                return HttpNotFound();
-            }
-            return View(department);
+            return PartialView(department);
         }
 
         //
         // POST: /Department/Delete/5
 
-        [HttpPost, ActionName("Delete")]
-        public ActionResult DeleteConfirmed(int id)
+        [HttpPost]
+        public void Delete(int id)
         {
             Department department = db.Departments.Find(id);
             db.Departments.Remove(department);
             db.SaveChanges();
-            return RedirectToAction("Index");
         }
 
         protected override void Dispose(bool disposing)

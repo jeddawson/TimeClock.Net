@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
+using System.Data.Objects;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -16,22 +18,36 @@ namespace TimeClock.Controllers
         //
         // GET: /Employee/
 
-        public ActionResult Index()
+        public ViewResult Index(int start = 0, int itemsPerPage = 20, string orderBy = "EmployeeID", bool desc = false)
         {
-            return View(db.Employees.ToList());
+            ViewBag.Count = db.Employees.Count();
+            ViewBag.Start = start;
+            ViewBag.ItemsPerPage = itemsPerPage;
+            ViewBag.OrderBy = orderBy;
+            ViewBag.Desc = desc;
+
+            return View();
         }
 
         //
-        // GET: /Employee/Details/5
+        // GET: /Employee/GridData/?start=0&itemsPerPage=20&orderBy=EmployeeID&desc=true
 
-        public ActionResult Details(string id = null)
+        public ActionResult GridData(int start = 0, int itemsPerPage = 20, string orderBy = "EmployeeID", bool desc = false)
+        {
+            Response.AppendHeader("X-Total-Row-Count", db.Employees.Count().ToString());
+            ObjectQuery<Employee> employees = (db as IObjectContextAdapter).ObjectContext.CreateObjectSet<Employee>();
+            employees = employees.OrderBy("it." + orderBy + (desc ? " desc" : ""));
+
+            return PartialView(employees.Skip(start).Take(itemsPerPage));
+        }
+
+        //
+        // GET: /Default5/RowData/5
+
+        public ActionResult RowData(string id)
         {
             Employee employee = db.Employees.Find(id);
-            if (employee == null)
-            {
-                return HttpNotFound();
-            }
-            return View(employee);
+            return PartialView("GridData", new Employee[] { employee });
         }
 
         //
@@ -39,7 +55,7 @@ namespace TimeClock.Controllers
 
         public ActionResult Create()
         {
-            return View();
+            return PartialView("Edit");
         }
 
         //
@@ -52,23 +68,19 @@ namespace TimeClock.Controllers
             {
                 db.Employees.Add(employee);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return PartialView("GridData", new Employee[] { employee });
             }
 
-            return View(employee);
+            return PartialView("Edit", employee);
         }
 
         //
         // GET: /Employee/Edit/5
 
-        public ActionResult Edit(string id = null)
+        public ActionResult Edit(string id)
         {
             Employee employee = db.Employees.Find(id);
-            if (employee == null)
-            {
-                return HttpNotFound();
-            }
-            return View(employee);
+            return PartialView(employee);
         }
 
         //
@@ -81,34 +93,21 @@ namespace TimeClock.Controllers
             {
                 db.Entry(employee).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return PartialView("GridData", new Employee[] { employee });
             }
-            return View(employee);
-        }
 
-        //
-        // GET: /Employee/Delete/5
-
-        public ActionResult Delete(string id = null)
-        {
-            Employee employee = db.Employees.Find(id);
-            if (employee == null)
-            {
-                return HttpNotFound();
-            }
-            return View(employee);
+            return PartialView(employee);
         }
 
         //
         // POST: /Employee/Delete/5
 
-        [HttpPost, ActionName("Delete")]
-        public ActionResult DeleteConfirmed(string id)
+        [HttpPost]
+        public void Delete(string id)
         {
             Employee employee = db.Employees.Find(id);
             db.Employees.Remove(employee);
             db.SaveChanges();
-            return RedirectToAction("Index");
         }
 
         protected override void Dispose(bool disposing)

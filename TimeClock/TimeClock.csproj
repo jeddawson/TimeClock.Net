@@ -140,6 +140,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MessageController.cs" />
     <Compile Include="Controllers\PayTypeController.cs" />
+    <Compile Include="Controllers\StatusController.cs" />
     <Compile Include="Controllers\TimeclockController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -327,6 +328,10 @@
     <Content Include="Views\Holiday\Edit.cshtml" />
     <Content Include="Views\Holiday\Delete.cshtml" />
     <Content Include="Views\Timeclock\Index.cshtml" />
+    <Content Include="Views\Status\Index.cshtml" />
+    <Content Include="Views\Employee\GridData.cshtml" />
+    <Content Include="Views\Company\GridData.cshtml" />
+    <Content Include="Views\Department\GridData.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

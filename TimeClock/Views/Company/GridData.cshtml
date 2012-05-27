@@ -1,0 +1,13 @@
+﻿@model IEnumerable<TimeClock.Models.Company>
+
+@foreach (var item in Model) {
+    <tr data-pkey="@item.CompanyID">
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+        <td class="rowControl hidden">
+            <a href="#makeRowEditable" class="makeRowEditable">Edit</a> |
+            <a href="#deleteRow" class="deleteRow">Delete</a>
+        </td>
+    </tr>
+}

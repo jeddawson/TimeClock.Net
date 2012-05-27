@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
+using System.Data.Objects;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -16,22 +18,36 @@ namespace TimeClock.Controllers
         //
         // GET: /Company/
 
-        public ActionResult Index()
+        public ViewResult Index(int start = 0, int itemsPerPage = 20, string orderBy = "CompanyID", bool desc = false)
         {
-            return View(db.Companies.ToList());
+            ViewBag.Count = db.Companies.Count();
+            ViewBag.Start = start;
+            ViewBag.ItemsPerPage = itemsPerPage;
+            ViewBag.OrderBy = orderBy;
+            ViewBag.Desc = desc;
+
+            return View();
         }
 
         //
-        // GET: /Company/Details/5
+        // GET: /Company/GridData/?start=0&itemsPerPage=20&orderBy=CompanyID&desc=true
 
-        public ActionResult Details(int id = 0)
+        public ActionResult GridData(int start = 0, int itemsPerPage = 20, string orderBy = "CompanyID", bool desc = false)
+        {
+            Response.AppendHeader("X-Total-Row-Count", db.Companies.Count().ToString());
+            ObjectQuery<Company> companies = (db as IObjectContextAdapter).ObjectContext.CreateObjectSet<Company>();
+            companies = companies.OrderBy("it." + orderBy + (desc ? " desc" : ""));
+
+            return PartialView(companies.Skip(start).Take(itemsPerPage));
+        }
+
+        //
+        // GET: /Default5/RowData/5
+
+        public ActionResult RowData(int id)
         {
             Company company = db.Companies.Find(id);
-            if (company == null)
-            {
-                return HttpNotFound();
-            }
-            return View(company);
+            return PartialView("GridData", new Company[] { company });
         }
 
         //
@@ -39,7 +55,7 @@ namespace TimeClock.Controllers
 
         public ActionResult Create()
         {
-            return View();
+            return PartialView("Edit");
         }
 
         //
@@ -52,23 +68,19 @@ namespace TimeClock.Controllers
             {
                 db.Companies.Add(company);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return PartialView("GridData", new Company[] { company });
             }
 
-            return View(company);
+            return PartialView("Edit", company);
         }
 
         //
         // GET: /Company/Edit/5
 
-        public ActionResult Edit(int id = 0)
+        public ActionResult Edit(int id)
         {
             Company company = db.Companies.Find(id);
-            if (company == null)
-            {
-                return HttpNotFound();
-            }
-            return View(company);
+            return PartialView(company);
         }
 
         //
@@ -81,34 +93,21 @@ namespace TimeClock.Controllers
             {
                 db.Entry(company).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return PartialView("GridData", new Company[] { company });
             }
-            return View(company);
-        }
 
-        //
-        // GET: /Company/Delete/5
-
-        public ActionResult Delete(int id = 0)
-        {
-            Company company = db.Companies.Find(id);
-            if (company == null)
-            {
-                return HttpNotFound();
-            }
-            return View(company);
+            return PartialView(company);
         }
 
         //
         // POST: /Company/Delete/5
 
-        [HttpPost, ActionName("Delete")]
-        public ActionResult DeleteConfirmed(int id)
+        [HttpPost]
+        public void Delete(int id)
         {
             Company company = db.Companies.Find(id);
             db.Companies.Remove(company);
             db.SaveChanges();
-            return RedirectToAction("Index");
         }
 
         protected override void Dispose(bool disposing)
