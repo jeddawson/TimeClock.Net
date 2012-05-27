@@ -1,0 +1,58 @@
+﻿@model TimeClock.Models.Department
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<h2>Create</h2>
+
+<script src="@Url.Content("~/Scripts/jquery.validate.min.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")"></script>
+
+@using (Html.BeginForm()) {
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Department</legend>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Name)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Name)
+            @Html.ValidationMessageFor(model => model.Name)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Location)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Location)
+            @Html.ValidationMessageFor(model => model.Location)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.PayPeriodSeed)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.PayPeriodSeed)
+            @Html.ValidationMessageFor(model => model.PayPeriodSeed)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.PayPeriodInterval)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.PayPeriodInterval)
+            @Html.ValidationMessageFor(model => model.PayPeriodInterval)
+        </div>
+
+        <p>
+            <input type="submit" value="Create" />
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>

@@ -1,0 +1,29 @@
+﻿@model TimeClock.Models.Holiday
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<fieldset>
+    <legend>Holiday</legend>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.Date)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.Date)
+    </div>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.Repeats)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.Repeats)
+    </div>
+</fieldset>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id=Model.HolidayID }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>
