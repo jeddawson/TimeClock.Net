@@ -36,7 +36,7 @@ namespace TimeClock
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
+                defaults: new { controller = "Timeclock", action = "Index", id = UrlParameter.Optional }
             );
         }
 
@@ -46,12 +46,14 @@ namespace TimeClock
 
             // Use LocalDB for Entity Framework by default
             Database.DefaultConnectionFactory = new SqlConnectionFactory("Data Source=(localdb)\v11.0; Integrated Security=True; MultipleActiveResultSets=True");
-            Database.SetInitializer<TimeClockContext>(new TimeClockInitializer());
-
+            
             RegisterGlobalFilters(GlobalFilters.Filters);
             RegisterRoutes(RouteTable.Routes);
 
-            BundleTable.Bundles.RegisterTemplateBundles();
+            //BundleTable.Bundles.RegisterTemplateBundles();
+            BundleTable.Bundles.Add(BundleManager.JsBundle());
+            BundleTable.Bundles.Add(BundleManager.CssBundle());
+            BundleTable.Bundles.Add(BundleManager.ModernizrBundle());
         }
     }
 }

@@ -1,52 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <title>@ViewBag.Title - My ASP.NET MVC Application</title>
-        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-        <link href="@System.Web.Optimization.BundleTable.Bundles.ResolveBundleUrl("~/Content/css")" rel="stylesheet" type="text/css" />
-        <link href="@System.Web.Optimization.BundleTable.Bundles.ResolveBundleUrl("~/Content/themes/base/css")" rel="stylesheet" type="text/css" />
-        <script src="@System.Web.Optimization.BundleTable.Bundles.ResolveBundleUrl("~/Scripts/js")"></script>
-        <meta name="viewport" content="width=device-width" />
-    </head>
-    <body>
-        <header>
-            <div class="content-wrapper">
-                <div class="float-left">
-                    <p class="site-title">@Html.ActionLink("your logo here.", "Index", "Home")</p>
-                </div>
-                <div class="float-right">
-                    <section id="login">
-                        @Html.Partial("_LoginPartial")
-                    </section>
-                    <nav>
-                        <ul id="menu">
-                            <li>@Html.ActionLink("Home", "Index", "Home")</li>
-                            <li>@Html.ActionLink("About", "About", "Home")</li>
-                            <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-        </header>
-        <div id="body">
-            @RenderSection("featured", required: false)
-            <section class="content-wrapper main-content clear-fix">
-                @RenderBody()
-            </section>
+
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+	<meta charset="utf-8" />
+
+	<!-- Set the viewport width to device width for mobile -->
+	<meta name="viewport" content="width=device-width" />
+
+	<title>@ViewBag.Title - Time</title>
+  
+	<!-- Included CSS Files -->
+    <script src="@System.Web.Optimization.BundleTable.Bundles.ResolveBundleUrl("~/Scripts/js")"></script>
+	<link href="@System.Web.Optimization.BundleTable.Bundles.ResolveBundleUrl("~/Content/css")" rel="stylesheet" type="text/css" />
+
+	<!--[if lt IE 9]>
+		<link rel="stylesheet" href="Content/foundation/ie.css">
+	<![endif]-->
+	
+	<script src="@System.Web.Optimization.BundleTable.Bundles.ResolveBundleUrl("~/Scripts/modernizr")"></script>
+
+	<!-- IE Fix for HTML5 Tags -->
+	<!--[if lt IE 9]>
+		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+</head>
+<body>
+    <!-- COREBar START -->
+    <div class="contianer top-bar home-border">
+        <div class="attached">
+            @Html.ActionLink("Time Clock", "Index", "Timeclock")
+            <ul class="right">
+                @if (Request.IsAuthenticated)
+                {
+                    <li>@Html.ActionLink("Manage", "Index", "Manage")</li>
+                    <li>@Html.ActionLink("Status", "Index", "Status")</li>
+                    if (Roles.IsUserInRole("Admin"))
+                    {
+                        <li>@Html.ActionLink("Users", "Index", "Account")</li>
+                    }
+                }
+                @Html.Partial("_LoginPartial")
+            </ul>
         </div>
-        <footer>
-            <div class="content-wrapper">
-                <div class="float-left">
-                    <p>&copy; @DateTime.Now.Year - My ASP.NET MVC Application</p>
-                </div>
-                <div class="float-right">
-                    <ul id="social">
-                        <li><a href="http://facebook.com" class="facebook">Facebook</a></li>
-                        <li><a href="http://twitter.com" class="twitter">Twitter</a></li>
-                    </ul>
-                </div>
-            </div>
-        </footer>
-    </body>
+    </div>
+    <!-- COREBar END -->
+
+    <!-- Content START -->
+    <div class="container">
+        @RenderBody()
+    </div>
+    <!-- Content END -->
+    <hr />
+	<div class="row">
+        <div class="eight columns">
+        <p>&copy; @DateTime.Now.Year - James Dawson & Mikkel Kringelbach</p>
+        </div>
+        <div class="four columns">
+            <p>Version: @typeof(TimeClock.MvcApplication).Assembly.GetName().Version</p>
+        </div>
+	</div>
+</body>
 </html>
