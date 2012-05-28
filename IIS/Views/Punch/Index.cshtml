@@ -1,13 +1,11 @@
-﻿@model IEnumerable<TimeClock.Models.Message>
-
-@{
+﻿@{
     ViewBag.Title = "Index";
 }
 <div class="row">
     <ul class="breadcrumbs">
         <li><span>Home</span></li>
         <li><span>Manage</span></li>
-        <li class="current"><span>Messages</span></li>
+        <li class="current"><span>Punches</span></li>
     </ul>
 </div>
 <div class="row">
@@ -15,14 +13,14 @@
         <div class="row">
             <dl class="nice vertical tabs">
                 <dd>@Html.ActionLink("Employees", "Index", "Employee")</dd>
-                <dd>@Html.ActionLink("Punches", "Index", "Punch")</dd>
+                <dd>@Html.ActionLink("Punches", "Index", "Punch", new { @class = "active" })</dd>
                 <dd>@Html.ActionLink("Companies", "Index", "Company")</dd>
                 <dd>@Html.ActionLink("Departments", "Index", "Department")</dd>
-                <dd>@Html.ActionLink("Messages", "Index", "Message", new { @class = "active" })</dd>
+                <dd>@Html.ActionLink("Messages", "Index", "Message")</dd>
             </dl>
         </div>
     </div>
     <div class="ten columns">
-    <p>This is on the To Do list.</p>
+        <p>Still need to do this one.</p>
     </div>
 </div>
