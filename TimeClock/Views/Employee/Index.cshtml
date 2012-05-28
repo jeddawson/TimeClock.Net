@@ -84,6 +84,11 @@
             <table id="AjaxGrid">
                 <thead>
                     <tr>
+                        <th data-column-name="EmployeeID">
+                            <span class="reorder">@Html.DisplayNameFor(model => model.EmployeeID)</span>
+                            <a href="@Url.RouteUrl(new { orderBy = "EmployeeID", desc = true })" class="uparrow">&uarr;</a>
+                            <a href="@Url.RouteUrl(new { orderBy = "EmployeeID" })" class="downarrow">&darr;</a>
+                        </th>
                         <th data-column-name="FirstName">
                             <span class="reorder">@Html.DisplayNameFor(model => model.FirstName)</span>
                             <a href="@Url.RouteUrl(new { orderBy = "FirstName", desc = true })" class="uparrow">&uarr;</a>

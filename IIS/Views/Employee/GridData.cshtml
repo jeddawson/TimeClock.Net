@@ -3,6 +3,9 @@
 @foreach (var item in Model) {
     <tr data-pkey="@item.EmployeeID">
         <td>
+             @Html.DisplayFor(modelItem => item.EmployeeID)
+        </td>
+        <td>
             @Html.DisplayFor(modelItem => item.FirstName)
         </td>
         <td>
