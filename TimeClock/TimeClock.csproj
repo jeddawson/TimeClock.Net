@@ -145,21 +145,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201205080617411_InitialCreate.cs" />
-    <Compile Include="Migrations\201205080617411_InitialCreate.Designer.cs">
-      <DependentUpon>201205080617411_InitialCreate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201205100511289_Latest.cs" />
-    <Compile Include="Migrations\201205100511289_Latest.Designer.cs">
-      <DependentUpon>201205100511289_Latest.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201205250444595_modLineAndTimecard.cs" />
-    <Compile Include="Migrations\201205250444595_modLineAndTimecard.Designer.cs">
-      <DependentUpon>201205250444595_modLineAndTimecard.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201205250520348_employeeIDResolution.cs" />
-    <Compile Include="Migrations\201205250520348_employeeIDResolution.Designer.cs">
-      <DependentUpon>201205250520348_employeeIDResolution.cs</DependentUpon>
+    <Compile Include="Migrations\201205280032303_InitialCreate.cs" />
+    <Compile Include="Migrations\201205280032303_InitialCreate.Designer.cs">
+      <DependentUpon>201205280032303_InitialCreate.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountModels.cs" />
