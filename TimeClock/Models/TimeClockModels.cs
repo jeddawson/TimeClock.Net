@@ -27,6 +27,16 @@ namespace TimeClock.Models
         {
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
             modelBuilder.Entity<MessageViewed>().HasKey(k => new { k.EmployeeID, k.MessageID });
+            modelBuilder.Entity<Employee>()
+                .HasMany(e => e.Messages)
+                .WithMany(m => m.Employees)
+                .Map(x =>
+                    {
+                        x.MapLeftKey("EmployeeID");
+                        x.MapRightKey("MessageID");
+                        x.ToTable("EmployeeMessages");
+                    });
+
         }
     }
 
@@ -50,6 +60,7 @@ namespace TimeClock.Models
         
         /* One to One */
         public string ManagerID { get; set; }
+        [ForeignKey("ManagerID")]
         public virtual Employee Manager { get; set;}
         
         /* One to Many */
