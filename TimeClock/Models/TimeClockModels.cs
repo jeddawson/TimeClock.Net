@@ -178,6 +178,12 @@ namespace TimeClock.Models
         public int PayTypeID { get; set; }
         [ForeignKey("PayTypeID")]
         public virtual PayType PayType { get; set; }
+
+        public TimeSpan getDuration() 
+        {
+            return SplitEnd.Subtract(SplitStart);
+        }
+
     }
 
     public class Timecard

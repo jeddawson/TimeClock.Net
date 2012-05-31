@@ -21,8 +21,11 @@ namespace TimeClock.Resources
           public TimeSpan Entry { get; set; }
           public double Regular { get; set; }
           public double Overtime { get; set; }
+         public enum PunchTypes {REGULAR, HOLIDAY, SICK, VACATION}
+         public PunchTypes PunchType {get; set; }
+         public int PunchID { get; set; }
 
-         public TimeCardView(int lineNumber, DateTime date, DateTime intime, DateTime outtime, double regular, double overtime) 
+         public TimeCardView(int lineNumber, DateTime date, DateTime intime, DateTime outtime, double regular, double overtime, int punchID, PunchTypes punchType = PunchTypes.REGULAR) 
           {
             lineNum = lineNumber;
             Date = date;
@@ -34,9 +37,12 @@ namespace TimeClock.Resources
             Regular = regular;
             Overtime = overtime;
 
+            PunchID = punchID;
+            PunchType = punchType;
+
           }
 
-         public TimeCardView(int lineNumber, DateTime date, DateTime intime, DateTime outtime)
+         public TimeCardView(int lineNumber, DateTime date, DateTime intime, DateTime outtime, int punchID, PunchTypes punchType = PunchTypes.REGULAR)
          {
              lineNum = lineNumber;
              Date = date;
@@ -47,6 +53,9 @@ namespace TimeClock.Resources
              Overtime = 0;
 
              Entry = Out.Subtract(In);
+
+             PunchType = punchType;
+             PunchID = punchID;
          }
 
          public void updateEntry() 
