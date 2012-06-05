@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using TimeClock.Models;
+using TimeClock.Resources;
 
 namespace TimeClock.Controllers
 {
@@ -11,9 +13,28 @@ namespace TimeClock.Controllers
         //
         // GET: /Status/
 
+        private TimeClockContext dbContext = new TimeClockContext();
+
         public ActionResult Index()
         {
-            return View();
+            
+            using (var db = new TimeClockContext())
+            {
+                List<Employee> WorkingEmp = new List<Employee>();
+
+                var Emp = db.Employees.Where(e => e.Terminated == false);
+
+                foreach(Employee employees in Emp)
+                {
+                    if (employees.isWorking(db))
+                        WorkingEmp.Add(employees);
+                }
+
+
+                return View(WorkingEmp);                
+            }
+
+
         }
 
     }

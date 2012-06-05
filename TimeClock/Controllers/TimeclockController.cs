@@ -19,7 +19,6 @@ namespace TimeClock.Controllers
             ViewBag.EmpList = new SelectList(dbContext.Employees.Where(e => e.Terminated == false).OrderBy(e => e.DepartmentID), "EmployeeID", "FirstName");
                 
             return View();
-           
         }
 
         /* Looks up the employees current status
@@ -28,10 +27,10 @@ namespace TimeClock.Controllers
         {
             using (var db = new TimeClockContext())
             {
-                PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, 1);
-
-                var empPunches = db.Punches.Where(p => p.EmployeeID == id && p.InTime > payPeriod.Start && p.InTime < payPeriod.End);
-                if (empPunches.Count(p => p.OutTime == null) != 0)
+                Employee emp = db.Employees.FirstOrDefault(e => e.EmployeeID == id);
+                bool empIn = emp.isWorking(db);
+    
+                if (empIn)
                     ViewBag.PunchDirection = "In";
                 else
                     ViewBag.PunchDirection = "Out";

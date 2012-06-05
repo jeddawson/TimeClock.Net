@@ -6,6 +6,7 @@ using System.Data.Entity.ModelConfiguration;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Linq;
 using System.Web;
+using TimeClock.Resources;
 
 namespace TimeClock.Models
 {
@@ -71,6 +72,17 @@ namespace TimeClock.Models
 
         /* Many to Many */
         public virtual ICollection<Message> Messages { get; set; }
+
+        public bool isWorking(TimeClockContext db)
+        {
+            PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, 1);
+
+            var empPunches = db.Punches.Where(p => p.EmployeeID == EmployeeID && p.InTime > payPeriod.Start && p.InTime < payPeriod.End);
+            if (empPunches.Count(p => p.OutTime == null) != 0)
+                return true;
+            else
+                return false;
+        }
     }
 
     public class Company

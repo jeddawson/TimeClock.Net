@@ -154,6 +154,7 @@
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\TimeClockModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\EmployeeStatus.cs" />
     <Compile Include="Resources\Objects.cs" />
     <Compile Include="Resources\PayPeriod.cs" />
   </ItemGroup>
