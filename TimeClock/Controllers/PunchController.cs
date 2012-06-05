@@ -20,19 +20,21 @@ namespace TimeClock.Controllers
         }
 
 
-        public ActionResult PunchGrid(string EID, PayPeriod p = null)
+        public ActionResult PunchGrid(string EID, PayPeriod pay = null)
         {
             using (var db = new TimeClockContext())
             {
-                if (p == null)
-                    p = PayPeriodTools.LookupPayPeriod(db, 1);
+                if (pay == null)
+                    pay = PayPeriodTools.LookupPayPeriod(db, 1);
 
+                // How are we suppose to handle punches that extend over the end of a payperiod?
+                //
                 // Get all punches from p payperiod - into a list
-                List<Punch> punches = null;
+                List<Punch> punches = db.Punches.Where(p => p.EmployeeID == EID && pay.Start < p.InTime && p.InTime < pay.End).ToList();
 
 
                 // return partial view
-                return PartialView("GridData", punches);
+                return PartialView("PunchData", punches);
             }
         }
 

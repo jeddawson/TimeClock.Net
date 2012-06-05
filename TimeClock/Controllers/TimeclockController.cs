@@ -56,17 +56,23 @@ namespace TimeClock.Controllers
 
                 foreach (Line line in lines)
                 {
-                    // If the previous line contains information about the same punch, the we update it.
-                    if (timecard.Count > 0 && timecard[timecard.Count - 1].Out == line.SplitStart) 
+                    int last = timecard.Count - 1;
+                    if (last > 0 && timecard[last].PunchID == line.PunchID)
                     {
-                        timecard[timecard.Count - 1].Out = line.SplitEnd;
-                        timecard[timecard.Count - 1].Overtime = line.SplitStart.Subtract(line.SplitEnd).TotalHours;
-                        timecard[timecard.Count - 1].updateEntry();
+                        timecard[last].Out = line.SplitEnd;
+                        if (line.PayType.Description == "Overtime")
+                            timecard[last].Overtime = line.SplitEnd.Subtract(line.SplitStart).TotalHours;
+                        else if (line.PayType.Description == "Regular")
+                            timecard[last].Regular = line.SplitEnd.Subtract(line.SplitStart).TotalHours;
+                        else ;
+
+                        timecard[last].updateEntry();
                     }
+
                     // Otherwise we create a new line and add it to the timecard.
                     else
                     {
-                        TimeCardView temp = new TimeCardView(lineNumberCounter, line.SplitStart.Date, line.SplitStart, line.SplitEnd);
+                        TimeCardView temp = new TimeCardView(lineNumberCounter, line.SplitStart.Date, line.SplitStart, line.SplitEnd, line.PunchID);
                         if (line.PayType.Description == "Regular")
                             temp.Regular = line.SplitStart.Subtract(line.SplitEnd).TotalHours;
                         else if (line.PayType.Description == "Overtime")
