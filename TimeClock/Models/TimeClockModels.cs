@@ -190,6 +190,8 @@ namespace TimeClock.Models
         public int PayTypeID { get; set; }
         [ForeignKey("PayTypeID")]
         public virtual PayType PayType { get; set; }
+        [ForeignKey("PunchID")]
+        public virtual Punch Punch { get; set; }
 
         public TimeSpan getDuration() 
         {
