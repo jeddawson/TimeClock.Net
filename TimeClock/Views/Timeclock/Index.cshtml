@@ -6,7 +6,7 @@
 
 <div class="row">
 <div class="three columns">
-    <form class="" data-bind="submit: doPunch">
+    <form class="custom" data-bind="submit: doPunch">
     <fieldset>
         <h4>Time Clock</h4>
         <p>Select your name and enter your pin.</p>
@@ -49,20 +49,7 @@
 
 <script lang="text/javascript">
 
-    //Class to represent an employee from the database
-    function employee(EmployeeName, EmployeeID, DepartmentID) {
-        var self = this;
-        self.name = EmployeeName;
-        self.ID = EmployeeID,
-        self.DepartmentID = DepartmentID;
-    };
-    
-    //Array of employee objects
-    var employeeList = [
-        @foreach ( var item in Model) {
-            <text>new employee("@item.EmployeeName", "@item.EmployeeID", @item.DepartmentID)</text>if(Model.Last().EmployeeID != item.EmployeeID){<text>,</text>}}];
-        
-    // Constructor for an line object
+   // Constructor for an line object
     var line = function (data) {
         this.date = ko.observable(data.date);
         this.inPunch = ko.observable(data.inPunch); 
@@ -72,10 +59,11 @@
         this.overtimeHours = ko.observable(data.overtimeHours);
     };
 
+    //The Knockout.js Model
     var TimecardViewModel = function() {
-        var self = this;
+        var self = this; //prevent issues with callbacks by masking 'this'
         
-        // Non-editable employee list
+        //Non-editable employee array generated at run time.
         self.availableEmployees = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.EmpList));
         
         self.selectedEmployeeValue = ko.observableArray([]);
@@ -93,20 +81,23 @@
             return true;
         });
 
+        //Does the post back to the server with the employee's ID and pin.
         self.doPunch = function() {
-            $.ajax("/REST/timeclock/punch", {
+            $.ajax("/REST/clock/punch", {
                 data: ko.toJSON({ employeeID: self.employeeID, pin: self.employeePin }),
                 type: "post", contentType: "application/json",
-                success: function(result) { process(result) }
+                success: function(result) { process(result); },
+                failure: function(exception) { doValidation(exception);}
             });
         };
-
+        
+        //When the internal value of selected employee changes, trigger the getStatus function
         self.selectedEmployeeValue.subscribe(function() {
             self.getStatus();
         });
 
+        //Checks the employee's status
         self.getStatus = function() {
-
             if(self.selectedEmployeeValue() != undefined) {
                 $.ajax("/REST/clock/status/" + self.selectedEmployeeValue(), {
                     type: "get", contentType: "application/json",
@@ -115,6 +106,7 @@
             }
         };
 
+        //Update the UI with new status information
         self.updateStatus = function(result) {
             self.punchDirection( result.isWorking ? "Punch Out" : "Punch In" );
             self.lines(result.TimeCard);
