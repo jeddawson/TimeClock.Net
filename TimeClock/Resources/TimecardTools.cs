@@ -9,7 +9,7 @@ namespace TimeClock.Resources
     public class EmployeeStatus
     {
         public string EmployeeID { get; set; }
-        public bool isWorking { get; set; }
+        public int openPunch { get; set; }
         public IEnumerable<Message> NewMessages { get; set; }
         public IEnumerable<TimeCardView> Timecard { get; set; }
     }

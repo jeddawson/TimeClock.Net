@@ -42,7 +42,7 @@ namespace TimeClock.Controllers
                 EmployeeStatus status = new EmployeeStatus()
                     {
                         EmployeeID = id,
-                        isWorking = employee.isWorking(db),
+                        openPunch = employee.isWorking(db),
                         NewMessages = employee.PendingMessages(db),
                         Timecard = employee.getTimeCardLines(db, payPeriod)
                     };

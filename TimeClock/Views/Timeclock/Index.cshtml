@@ -72,7 +72,9 @@
         
         self.employeePin = ko.observable("");
         
-        self.punchDirection = ko.observable("");      
+        self.punchDirection = ko.observable("");
+        
+        self.openPunch = ko.observable("");
 
         self.employeePin.subscribe(function() {
             if(self.employeePin().length >= 4) {
@@ -108,8 +110,9 @@
 
         //Update the UI with new status information
         self.updateStatus = function(result) {
-            self.punchDirection( result.isWorking ? "Punch Out" : "Punch In" );
-            self.lines(result.TimeCard);
+            self.punchDirection( result.openPunch > 0 ? "Punch Out" : "Punch In" );
+            self.openPunch( result.openPunch );
+            self.lines( result.TimeCard.length ? result.TimeCard : "" );
         };
 
     }

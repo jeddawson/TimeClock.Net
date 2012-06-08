@@ -26,7 +26,7 @@ namespace TimeClock.Controllers
 
                 foreach(Employee employees in Emp)
                 {
-                    if (employees.isWorking(db))
+                    if (employees.isWorking(db) > 0)
                         WorkingEmp.Add(employees);
                 }
 

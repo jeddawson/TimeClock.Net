@@ -40,9 +40,9 @@ namespace TimeClock.Controllers
             using (var db = new TimeClockContext())
             {
                 Employee emp = db.Employees.FirstOrDefault(e => e.EmployeeID == id);
-                bool empIn = emp.isWorking(db);
+                int empIn = emp.isWorking(db);
     
-                if (empIn)
+                if (empIn > 0)
                     ViewBag.PunchDirection = "In";
                 else
                     ViewBag.PunchDirection = "Out";

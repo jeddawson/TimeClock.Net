@@ -74,15 +74,16 @@ namespace TimeClock.Models
         /* Many to Many */
         public virtual ICollection<Message> Messages { get; set; }
 
-        public bool isWorking(TimeClockContext db)
+        public int isWorking(TimeClockContext db)
         {
             PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, 1);
 
             var empPunches = db.Punches.Where(p => p.EmployeeID == EmployeeID && p.InTime > payPeriod.Start && p.InTime < payPeriod.End);
             if (empPunches.Count(p => p.OutTime == null) != 0)
-                return true;
-            else
-                return false;
+                if( DateTime.Now.Subtract( empPunches.Last().InTime ) < TimeSpan.FromHours(12) )
+                    return empPunches.Last().PunchID;
+
+            return -1;
         }
 
         public IEnumerable<Message> PendingMessages(TimeClockContext db)
