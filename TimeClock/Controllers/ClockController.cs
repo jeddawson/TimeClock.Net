@@ -36,9 +36,9 @@ namespace TimeClock.Controllers
                 {
                     employeeList.Add(new ClockInitialItem()
                     {
-                        EmployeeID = e.EmployeeID,
-                        EmployeeName = e.FirstName + " " + e.LastName,
-                        DepartmentID = e.DepartmentID
+                        EmployeeID      = e.EmployeeID,
+                        EmployeeName    = e.FirstName + " " + e.LastName,
+                        DepartmentID    = e.DepartmentID
                     });
                 }
 
@@ -63,17 +63,17 @@ namespace TimeClock.Controllers
 
                 Employee employee = db.Employees.SingleOrDefault(e => e.EmployeeID == id);
 
-                PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, 1);
+                PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, Constants.DEFAULT_DEPARTMENT);
 
                 if (employee == null)
                     throw new HttpResponseException(HttpStatusCode.NoContent);
 
                 EmployeeStatus status = new EmployeeStatus()
                     {
-                        EmployeeID = id,
-                        openPunch = employee.isWorking(db),
+                        EmployeeID  = id,
+                        openPunch   = employee.isWorking(db),
                         NewMessages = employee.PendingMessages(db),
-                        Timecard = employee.getTimeCardLines(db, payPeriod)
+                        Timecard    = employee.getTimeCardLines(db, payPeriod)
                     };
                 
                 return status;

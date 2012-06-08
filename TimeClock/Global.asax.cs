@@ -27,12 +27,14 @@ namespace TimeClock
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            // This is the Web API route:
             routes.MapHttpRoute(
                 name: "RESTApi",
                 routeTemplate: "REST/{controller}/{action}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
 
+            //This is the MVC route:
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
@@ -50,9 +52,13 @@ namespace TimeClock
             RegisterGlobalFilters(GlobalFilters.Filters);
             RegisterRoutes(RouteTable.Routes);
 
-            //BundleTable.Bundles.RegisterTemplateBundles();
+            //Putting all of the JS into a single file:
             BundleTable.Bundles.Add(BundleManager.JsBundle());
+            
+            //Putting all of the CSS into a single file:
             BundleTable.Bundles.Add(BundleManager.CssBundle());
+            
+            //Extra JS file, only loaded by browsers that don't support HTML5
             BundleTable.Bundles.Add(BundleManager.ModernizrBundle());
         }
     }
