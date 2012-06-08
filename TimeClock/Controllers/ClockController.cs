@@ -11,21 +11,49 @@ namespace TimeClock.Controllers
 {
     public class ClockController : ApiController
     {
-        // GET /api/clock
+        // [GET] /REST/clock/getlist
 
         /** 
-         *  Returns the current server time in JSON. No real point to this operation.
+         *  Returns the list of active employees who are able to use the time clock.
+         *  
+         *  This function is meant for use by embedded devices. The web application will
+         *  be accessing this list from the MVC controller (Timeclock/Index) when inially
+         *  loading to cut down on open sockets.
+         *  
+         *  iOS/Android => watch out!
+         * 
         **/
 
-        public String Get()
+        public IEnumerable<ClockInitialItem> GetList()
         {
-            return "[{ ServerTime: \"" + DateTime.Now + "\" }]";
+            using (var db = new TimeClockContext())
+            {
+                List<ClockInitialItem> employeeList = new List<ClockInitialItem>();
+
+                var activeEmployees = db.Employees.Where(e => e.Terminated == false).OrderBy(e => e.DepartmentID);
+
+                foreach (Employee e in activeEmployees)
+                {
+                    employeeList.Add(new ClockInitialItem()
+                    {
+                        EmployeeID = e.EmployeeID,
+                        EmployeeName = e.FirstName + " " + e.LastName,
+                        DepartmentID = e.DepartmentID
+                    });
+                }
+
+                return employeeList;
+            }
         }
 
-        // GET /REST/status/10-Jed
+        // [GET] /REST/status/10-Jed
 
         /** 
-         *  Returns the employee's status along with any new/pending messages for them. 
+         *  Returns the employee's status along with any new/pending messages for them.
+         * 
+         *  Status Code: 200 - Have results
+         *               204 - No matching EmployeeID in Employee table
+         * 
         **/
 
         public EmployeeStatus Status(string id)
@@ -51,14 +79,19 @@ namespace TimeClock.Controllers
             }
         }
 
-        // POST /REST/clock/punch
+        // [POST] /REST/clock/punch
 
         /** 
          *  Does the punch!
          * 
          *  Returns a status code of 201 (created) when this is successful.
-         *  Otherwise throws an error, with explaination.
          * 
+         *  Status Code: 201 - Punch successfully created 
+         *               204 - EmployeeID & Pin are valid but don't match records in DB
+         *               200 - Exception JSON encoded in body example: [{ EmployeeID: "Invalid", EmployeePin: "Invalid - Must be between 4 and 10 digits." }]
+         *               
+         *  See TimecardTools -> PunchRequest for a definition of the expected POST body.
+         *  
         **/
 
         [HttpPost]
@@ -66,7 +99,7 @@ namespace TimeClock.Controllers
         {
             using (var db = new TimeClockContext())
             {
-                //TODO ITEM
+                /******************************************************************************    TODO ITEM    *********************************/
                 //This is where we need to insert the new punch for the employee
                 //If it is an out punch, we should recalculate their timecard lines. 
 
@@ -74,13 +107,15 @@ namespace TimeClock.Controllers
             }
         }
 
-        // POST /REST/clock/messageviewed
+        // [POST] /REST/clock/messageviewed
 
         /** 
          *  Marks a message as viewed. 
          * 
-         *  Returns a status code of 201 (created) when this is successful.
-         *  Otherwise throws an error, with explaination.
+         *  Status Code: 201 - Message archived successfully.
+         *               200 - Error JSON encoded in body.
+         *  
+         *  See TimecardTool -> MessageRead for a definition of the expected POST body
          * 
         **/
 
@@ -89,7 +124,7 @@ namespace TimeClock.Controllers
         {
             using (var db = new TimeClockContext())
             {
-                //TODO ITEM
+                /******************************************************************************    TODO ITEM    *********************************/
                 //Need to mark the corresponding message read.
 
                 return new HttpResponseMessage(HttpStatusCode.Created);
