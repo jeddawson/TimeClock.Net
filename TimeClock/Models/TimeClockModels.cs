@@ -66,6 +66,7 @@ namespace TimeClock.Models
         
         /* One to Many */
         public virtual ICollection<Punch> Punches { get; set; }
+        [ForeignKey("EmployeeID")]
         public virtual ICollection<MessageViewed> ViewedMessages { get; set; }
         [ForeignKey("EmployeeID")]
         public virtual ICollection<Timecard> Timecards { get; set; }
@@ -83,6 +84,64 @@ namespace TimeClock.Models
             else
                 return false;
         }
+
+        public IEnumerable<Message> PendingMessages(TimeClockContext db)
+        {
+            List<Message> myMessages = Messages.ToList();
+
+            foreach (Message m in myMessages)
+            {
+                var isViewed = db.MessagesViewed.SingleOrDefault(v => v.MessageID == m.MessageID && v.EmployeeID == this.EmployeeID);
+                if (isViewed != null) myMessages.Remove(m);
+            }
+
+            return myMessages.AsEnumerable();
+        }
+
+        public IEnumerable<TimeCardView> getTimeCardLines(TimeClockContext db, PayPeriod payPeriod)
+        {
+            int lineNumberCounter = 1;
+            List<TimeCardView> timecard = new List<TimeCardView>();
+            
+            var empTC = db.Timecards.SingleOrDefault(t => t.EmployeeID == this.EmployeeID && t.PayPeriod == payPeriod.Start);
+
+            var lines = db.Lines.Where(l => l.TimecardID == empTC.TimecardID);
+
+            lines.OrderBy(l => l.SplitStart);
+
+            foreach (Line line in lines)
+            {
+                int last = timecard.Count - 1;
+                if (last > 0 && timecard[last].PunchID == line.PunchID)
+                {
+                    timecard[last].Out = line.SplitEnd;
+                    if (line.PayType.Description == "Overtime")
+                        timecard[last].Overtime = line.SplitEnd.Subtract(line.SplitStart).TotalHours;
+                    else if (line.PayType.Description == "Regular")
+                        timecard[last].Regular = line.SplitEnd.Subtract(line.SplitStart).TotalHours;
+                    else ;
+
+                    timecard[last].updateEntry();
+                }
+
+                // Otherwise we create a new line and add it to the timecard.
+                else
+                {
+                    TimeCardView temp = new TimeCardView(lineNumberCounter, line.SplitStart.Date, line.SplitStart, line.SplitEnd, line.PunchID);
+                    if (line.PayType.Description == "Regular")
+                        temp.Regular = line.SplitStart.Subtract(line.SplitEnd).TotalHours;
+                    else if (line.PayType.Description == "Overtime")
+                        temp.Overtime = line.SplitStart.Subtract(line.SplitEnd).TotalHours;
+                    else
+                        ;// What should we do if it is neither of the two?
+
+                    timecard.Add(temp);
+                }
+            }
+
+            return timecard;
+        }
+
     }
 
     public class Company
@@ -129,7 +188,7 @@ namespace TimeClock.Models
        // [Key, Column(Order = 0)]
         public int MessageID { get; set; }
        // [Key, Column(Order=1)]
-        public int EmployeeID { get; set; }
+        public string EmployeeID { get; set; }
         public DateTime? DateViewed { get; set; }
     }
 

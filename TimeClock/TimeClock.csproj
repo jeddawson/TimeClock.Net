@@ -133,6 +133,7 @@
   <ItemGroup>
     <Compile Include="BundleManager.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\ClockController.cs" />
     <Compile Include="Controllers\CompanyController.cs" />
     <Compile Include="Controllers\DepartmentController.cs" />
     <Compile Include="Controllers\EmployeeController.cs" />
@@ -150,11 +151,19 @@
     <Compile Include="Migrations\201205280032303_InitialCreate.Designer.cs">
       <DependentUpon>201205280032303_InitialCreate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201206060003269_lineVirtualPunch.cs" />
+    <Compile Include="Migrations\201206060003269_lineVirtualPunch.Designer.cs">
+      <DependentUpon>201206060003269_lineVirtualPunch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201206072334013_fixedMessageViewed.cs" />
+    <Compile Include="Migrations\201206072334013_fixedMessageViewed.Designer.cs">
+      <DependentUpon>201206072334013_fixedMessageViewed.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\TimeClockModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resources\EmployeeStatus.cs" />
+    <Compile Include="Resources\TimecardTools.cs" />
     <Compile Include="Resources\Objects.cs" />
     <Compile Include="Resources\PayPeriod.cs" />
   </ItemGroup>

@@ -4,13 +4,13 @@
 
 <div class="row">
 <div class="three columns">
-    <form class="custom">
+    <form class="custom" data-bind="submit: doPunch">
     <fieldset>
         <h4>Time Clock</h4>
         <p>Select your name and enter your pin.</p>
         <div class="row">
                 <label>Name</label>
-                @Html.DropDownList("EmployeeID", (IEnumerable<SelectListItem>) ViewBag.EmpList, new { @style = "display: none;" })
+                <select data-bind="options: availableEmployees, value: 'EmployeeID', optionsText: 'EmployeeName'"></select>
         </div>
         <div class="row">
             <label>Pin</label>
@@ -18,14 +18,71 @@
         </div>
         <div class="row"></div>
         <div class="row">
-            <a href="#" class="large radius nice blue button"></a>
+            <a href="#" class="large radius nice blue button" data-bind="click: doPunch, text: punchDirection"></a>
         </div>
     </fieldset>
     </form>
 </div>
 <div class="nine columns">
-    <fieldset>
+    <ul data-bind="foreach: lines, visable: lines().length > 0">
+        <li>
+            <span data-bind="text: date">&nbsp</span>
+            <span data-bind="text: inPunch">&nbsp</span>
+            <span data-bind="text: outPunch">&nbsp</span>
+            <span data-bind="text: entryTime">&nbsp</span>
+            <span data-bind="text: regularHours">&nbsp</span>
+            <span data-bind="text: overtimeHours">&nbsp</span>
+        </li>
+    </ul>
+</div>
+</div>
 
-    </fieldset>
-</div>
-</div>
+<script lang="text/javascript">
+
+    var initialList = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.EmpList));
+
+    function Line(data) {
+        this.date = ko.observable(data.date);
+        this.inPunch = ko.observable(data.inPunch); 
+        this.outPunch = ko.observable(data.outPunch);
+        this.entryTime = ko.observable(data.entryTime);
+        this.regularHours = ko.observable(data.regularHours);
+        this.overtimeHours = ko.observable(data.overtimeHours);
+    }
+
+    function TimecardViewModel() {
+        var self = this;
+        self.availableEmployees = initialList;
+        self.lines = ko.observableArray([]);
+        self.employeeID = ko.observable();
+        self.employeePin = ko.observable();
+        self.punchDirection = "";
+         /*   
+            function() {
+            if( self.employeeID.selected == "true" ) {
+                return getStatus();
+            } else {
+                return "";
+            }
+        };*/
+
+        self.doPunch = function() {
+            $.ajax("/REST/timeclock/punch", {
+                data: ko.toJSON({ employeeID: self.employeeID, pin: self.employeePin }),
+                type: "post", contentType: "application/json",
+                success: function(result) { process(result) }
+            });
+        };
+
+        self.getStatus = function() {
+            $.ajax("/REST/clock/status/" + self.emplpoyeeID , {
+                type: "get", contentType: "application/json",
+                success: function(result) { updateStatus(result) }
+            });
+        };
+
+    }
+    
+    ko.applyBindings( new TimecardViewModel());
+
+</script>

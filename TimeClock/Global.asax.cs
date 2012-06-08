@@ -28,8 +28,8 @@ namespace TimeClock
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}",
+                name: "RESTApi",
+                routeTemplate: "REST/{controller}/{action}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
 

@@ -15,9 +15,21 @@ namespace TimeClock.Controllers
 
         public ActionResult Index()
         {
+            List<ClockInitialItem> initialData = new List<ClockInitialItem>();
+
+            var activeEmployees = dbContext.Employees.Where(e => e.Terminated == false).OrderBy(e => e.DepartmentID);
+
+            foreach (Employee e in activeEmployees)
+            {
+                initialData.Add(new ClockInitialItem()
+                {
+                    EmployeeID = e.EmployeeID,
+                    EmployeeName = e.FirstName + " " + e.LastName,
+                    DepartmentID = e.DepartmentID
+                });
+            }
             
-            ViewBag.EmpList = new SelectList(dbContext.Employees.Where(e => e.Terminated == false).OrderBy(e => e.DepartmentID), "EmployeeID", "FirstName");
-                
+            ViewBag.EmpList = initialData.AsEnumerable();
             return View();
         }
 
