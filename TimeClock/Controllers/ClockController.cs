@@ -32,20 +32,22 @@ namespace TimeClock.Controllers
         {
             using( var db = new TimeClockContext() ) {
 
-                var employee = db.Employees.SingleOrDefault(e => e.EmployeeID == id);
+                Employee employee = db.Employees.SingleOrDefault(e => e.EmployeeID == id);
 
                 PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, 1);
 
                 if (employee == null)
                     throw new HttpResponseException(HttpStatusCode.NoContent);
 
-                return new EmployeeStatus()
+                EmployeeStatus status = new EmployeeStatus()
                     {
                         EmployeeID = id,
                         isWorking = employee.isWorking(db),
                         NewMessages = employee.PendingMessages(db),
                         Timecard = employee.getTimeCardLines(db, payPeriod)
                     };
+                
+                return status;
             }
         }
 

@@ -1,20 +1,30 @@
-﻿@{
+﻿@model IEnumerable<TimeClock.Resources.ClockInitialItem>
+
+@{
     ViewBag.Title = "Clock";
 }
 
 <div class="row">
 <div class="three columns">
-    <form class="custom" data-bind="submit: doPunch">
+    <form class="" data-bind="submit: doPunch">
     <fieldset>
         <h4>Time Clock</h4>
         <p>Select your name and enter your pin.</p>
         <div class="row">
                 <label>Name</label>
-                <select data-bind="options: availableEmployees, value: 'EmployeeID', optionsText: 'EmployeeName'"></select>
+                <select data-bind="
+                        options: availableEmployees,
+                        value: selectedEmployeeValue,
+                        valueUpdate: 'change',
+                        optionsText: 'EmployeeName', 
+                        optionsValue: 'EmployeeID', 
+                        optionsCaption: 'Choose...'">
+                </select>
+                <input type="hidden" data-bind="value: selectedEmployeeValue, event: { change: getStatus }" value="" />
         </div>
         <div class="row">
             <label>Pin</label>
-            <input type="password" class="oversize input-text" id="pin" />
+            <input type="password" class="oversize input-text" id="pin" data-bind="value: employeePin" />
         </div>
         <div class="row"></div>
         <div class="row">
@@ -39,32 +49,49 @@
 
 <script lang="text/javascript">
 
-    var initialList = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.EmpList));
-
-    function Line(data) {
+    //Class to represent an employee from the database
+    function employee(EmployeeName, EmployeeID, DepartmentID) {
+        var self = this;
+        self.name = EmployeeName;
+        self.ID = EmployeeID,
+        self.DepartmentID = DepartmentID;
+    };
+    
+    //Array of employee objects
+    var employeeList = [
+        @foreach ( var item in Model) {
+            <text>new employee("@item.EmployeeName", "@item.EmployeeID", @item.DepartmentID)</text>if(Model.Last().EmployeeID != item.EmployeeID){<text>,</text>}}];
+        
+    // Constructor for an line object
+    var line = function (data) {
         this.date = ko.observable(data.date);
         this.inPunch = ko.observable(data.inPunch); 
         this.outPunch = ko.observable(data.outPunch);
         this.entryTime = ko.observable(data.entryTime);
         this.regularHours = ko.observable(data.regularHours);
         this.overtimeHours = ko.observable(data.overtimeHours);
-    }
+    };
 
-    function TimecardViewModel() {
+    var TimecardViewModel = function() {
         var self = this;
-        self.availableEmployees = initialList;
-        self.lines = ko.observableArray([]);
-        self.employeeID = ko.observable();
-        self.employeePin = ko.observable();
-        self.punchDirection = "";
-         /*   
-            function() {
-            if( self.employeeID.selected == "true" ) {
-                return getStatus();
-            } else {
-                return "";
+        
+        // Non-editable employee list
+        self.availableEmployees = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.EmpList));
+        
+        self.selectedEmployeeValue = ko.observableArray([]);
+        
+        self.lines = ko.observableArray([]);       
+        
+        self.employeePin = ko.observable("");
+        
+        self.punchDirection = ko.observable("");      
+
+        self.employeePin.subscribe(function() {
+            if(self.employeePin().length >= 4) {
+                //Nothing for now, eventually want to validate it on the fly!
             }
-        };*/
+            return true;
+        });
 
         self.doPunch = function() {
             $.ajax("/REST/timeclock/punch", {
@@ -74,15 +101,27 @@
             });
         };
 
+        self.selectedEmployeeValue.subscribe(function() {
+            self.getStatus();
+        });
+
         self.getStatus = function() {
-            $.ajax("/REST/clock/status/" + self.emplpoyeeID , {
-                type: "get", contentType: "application/json",
-                success: function(result) { updateStatus(result) }
-            });
+
+            if(self.selectedEmployeeValue() != undefined) {
+                $.ajax("/REST/clock/status/" + self.selectedEmployeeValue(), {
+                    type: "get", contentType: "application/json",
+                    success: function(result) { self.updateStatus(result) }
+                });
+            }
+        };
+
+        self.updateStatus = function(result) {
+            self.punchDirection( result.isWorking ? "Punch Out" : "Punch In" );
+            self.lines(result.TimeCard);
         };
 
     }
-    
-    ko.applyBindings( new TimecardViewModel());
+
+    $(document).ready(function() { ko.applyBindings( new TimecardViewModel()); });
 
 </script>

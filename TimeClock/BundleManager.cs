@@ -20,7 +20,7 @@ namespace TimeClock
             jsBundle.AddFile("~/Scripts/modernizr.foundation.js", true);
             jsBundle.AddFile("~/Scripts/jquery-1.7.2.min.js", true);
             jsBundle.AddFile("~/Scripts/jquery.unobtrusive-ajax.min.js", true);
-            jsBundle.AddFile("~/Scripts/knockout.js", true);
+            jsBundle.AddFile("~/Scripts/knockout-2.1.0.js", true);
 
             return jsBundle;
         }

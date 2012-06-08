@@ -28,9 +28,9 @@ namespace TimeClock.Controllers
                     DepartmentID = e.DepartmentID
                 });
             }
-            
+   
             ViewBag.EmpList = initialData.AsEnumerable();
-            return View();
+            return View(initialData);
         }
 
         /* Looks up the employees current status

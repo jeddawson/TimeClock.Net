@@ -105,8 +105,14 @@ namespace TimeClock.Models
             
             var empTC = db.Timecards.SingleOrDefault(t => t.EmployeeID == this.EmployeeID && t.PayPeriod == payPeriod.Start);
 
-            var lines = db.Lines.Where(l => l.TimecardID == empTC.TimecardID);
+            //Need to bail out if we don't have time cards
+            if (empTC == null) return timecard;
 
+            var lines = db.Lines.Where(l => l.TimecardID == empTC.TimecardID);
+            
+            //Need to bail out if we don't have time card lines
+            if (lines == null) return timecard;
+            
             lines.OrderBy(l => l.SplitStart);
 
             foreach (Line line in lines)
