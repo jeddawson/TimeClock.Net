@@ -50,6 +50,7 @@ namespace TimeClock.Controllers
 
         /** 
          *  Returns the employee's status along with any new/pending messages for them.
+         *  The receiving web application should only display the messages after the employee has authenticated.
          * 
          *  Status Code: 200 - Have results
          *               204 - No matching EmployeeID in Employee table
