@@ -161,18 +161,25 @@ namespace TimeClock.Models
 
     public class Department
     {
-        public int DepartmentID { get; set; }
-        public string Name { get; set; }
-        public string Location { get; set; }
+        public int          DepartmentID        { get; set; }
+        public string       Name                { get; set; }
+        public string       Location            { get; set; }
         
-        public DateTime PayPeriodSeed { get; set; } //First day of the first payperiod.
-        public int PayPeriodInterval { get; set; }  //Number of days in a pay period.
+        public DateTime     PayPeriodSeed       { get; set; } //First day of the first payperiod.
+        public int          PayPeriodInterval   { get; set; }  //Number of days in a pay period.
+        public virtual Company Company          { get; set; }
 
-        public virtual Company Company { get; set; }
-        
+        /* One to One */
+        [ForeignKey("PayTypeID")]
+        public virtual PayType DefaultPayType       { get; set; }
+        [ForeignKey("PayTypeID")]
+        public virtual PayType DefaultSickType      { get; set; }
+        [ForeignKey("PayTypeID")]
+        public virtual PayType DefaultHolidayType   { get; set; }
+
         /* One to Many */
-        public virtual ICollection<Employee> Employees { get; set; }
-        public virtual ICollection<Punch> Punches { get; set; }
+        public virtual ICollection<Employee>    Employees   { get; set; }
+        public virtual ICollection<Punch>       Punches     { get; set; }
 
         /* Many to Many */
         public virtual ICollection<Holiday> Holidays { get; set; }
@@ -214,10 +221,11 @@ namespace TimeClock.Models
 
     public class PayType
     {
-        public int PayTypeID { get; set; }
-        public int DailyMax { get; set; }
-        public int WeeklyMax { get; set; }
-        public string Description { get; set; }
+        public int      PayTypeID       { get; set; }
+        public int      DailyMax        { get; set; }
+        public int      WeeklyMax       { get; set; }
+        public int      SeventhDayMax   { get; set; }
+        public string   Description     { get; set; }
         
         /* One to One */
         public virtual PayType NextPayType { get; set; }

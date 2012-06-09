@@ -12,8 +12,6 @@ namespace TimeClock.Controllers
 
     public class ClockController : ApiController
     {
-        private PayType Regular = new TimeClockContext().PayTypes.SingleOrDefault(pt => pt.Description.Equals("Regular"));
-        private PayType Overtime = new TimeClockContext().PayTypes.SingleOrDefault(pt => pt.Description.Equals("Overtime"));
         
         /*
         private IEnumerable<PayType> PayTypes = new TimeClockContext().PayTypes.Where(pt => 
