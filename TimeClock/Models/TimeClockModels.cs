@@ -239,6 +239,16 @@ namespace TimeClock.Models
 
         /* One to Many */
         public virtual ICollection<Line> Lines { get; set; }
+
+        public TimeSpan getDuration()
+        {
+            if(OutTime.HasValue)
+                return OutTime.Value.Subtract(InTime);
+            else
+                return new TimeSpan(0, 0, 0);
+        }
+
+
     }
 
     public class PunchType

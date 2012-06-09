@@ -28,5 +28,24 @@ namespace TimeClock.Resources
             return payPeriod;
         }
 
+        public static PayPeriod LookupPayPeriod(TimeClockContext db, int DepartmentID, DateTime time)
+        {
+            var seed = db.Departments.SingleOrDefault(d => d.DepartmentID == DepartmentID);
+
+            DateTime seedDate = seed.PayPeriodSeed;
+            int interval = seed.PayPeriodInterval;
+
+            TimeSpan span = time.Subtract(seedDate);
+
+            int count = (int)Math.Floor(span.TotalDays / (double)interval);
+
+            PayPeriod payPeriod = new PayPeriod();
+            payPeriod.Start = seedDate.AddDays(count * interval);
+
+            payPeriod.End = seedDate.AddDays(((count + 1) * interval) - 1);
+
+            return payPeriod;
+        }
+
     }
 }
