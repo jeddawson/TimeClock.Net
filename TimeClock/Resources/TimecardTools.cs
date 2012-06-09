@@ -49,7 +49,7 @@ namespace TimeClock.Resources
         public bool     isSuccess       { get; set; }
         public string   pinError        { get; set; }
         public string   generalError    { get; set; }
-        public TimeCardView timecardData { get; set; }
+        public IEnumerable<TimeCardView> timecardData { get; set; }
     }
 
     public class ClockInitialItem
