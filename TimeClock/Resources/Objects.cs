@@ -10,6 +10,14 @@ namespace TimeClock.Resources
      {
           public DateTime Start { get; set; }
           public DateTime End { get; set; }
+
+          public bool Equals(PayPeriod p)
+          {
+              if ((object)p == null)
+                  return false;
+
+              return (Start.Equals(p.Start) && End.Equals(p.End));
+          }
      }
 
      public class TimeCardView

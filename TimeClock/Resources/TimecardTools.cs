@@ -80,6 +80,8 @@ namespace TimeClock.Resources
     {
         public static bool addLines(TimeClockContext db, Punch punch) 
         {
+            PayPeriod payp = PayPeriodTools.LookupPayPeriod(db, );
+
             // determine payperiod
             // check if we reach over payperiods
 
