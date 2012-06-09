@@ -167,7 +167,7 @@ namespace TimeClock.Controllers
                         while (weeklyMinuts > payType.WeeklyMax)
                             payType = payType.NextPayType;
 
-                        double dailyMinuts = 0;
+                        double dailyMinuts = 0; // This needs to be changed.
                         foreach (Line line in lines.Where(l =>
                             l.SplitStart.Subtract(currentPunch.InTime).Days > 0 &&
                             l.SplitStart.Subtract(currentPunch.InTime).Days < 1)
@@ -182,7 +182,30 @@ namespace TimeClock.Controllers
                         
                         if (currentPunch.OutTime < currentPayPeriod.Start.AddDays((double)emp.department.PayPeriodInterval)) // We don't need to split the punch over pay periods
                         {
-                            if(weeklyMinuts
+                            double minutsWorkd = currentPunch.getDuration().TotalMinutes;
+                            double dailyMinutsLeft = payType.DailyMax - dailyMinuts;
+                            double weeklyMinutsLeft = payType.WeeklyMax - weeklyMinuts;
+
+
+
+                            /*
+                            if (weeklyMinuts + currentPunch.getDuration().TotalMinutes < payType.WeeklyMax) // No need to split due to weekly max
+                            {
+                                if (dailyMinuts + currentPunch.getDuration().TotalMinutes < payType.DailyMax) // No need to split due to daily max
+                                {
+                                    db.Lines.Add(new Line() 
+                                        { 
+                                        TimecardID = empTimecard.TimecardID,
+                                        PunchID = currentPunch.PunchID,
+                                        SplitStart = currentPunch.InTime,
+                                        SplitEnd = currentPunch.OutTime.Value,
+                                        }
+                                        );
+                                    db.SaveChanges();
+                                }
+
+                            }
+                            */
                         }
 
                     }

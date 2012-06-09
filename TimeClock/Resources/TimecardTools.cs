@@ -76,4 +76,58 @@ namespace TimeClock.Resources
         public bool     isNew           { get; set; }
     }
 
+    public class Calculations
+    {
+        public static bool addLines(TimeClockContext db, Punch punch) 
+        {
+            // determine payperiod
+            // check if we reach over payperiods
+
+                // if we do split accordingly and call addLinesTimecard
+
+            // just call addLinesTimecard
+            return true;
+
+        }
+
+        private static bool addLinesTimecard(TimeClockContext db, Punch punch, Timecard tc, DateTime splitStart, DateTime splitEnd)
+        {
+            // Calculate weeklyWorked, and dailyWorked
+
+            // Split on days
+
+                // Determine if special seventh day
+
+            // call addLinesHelper with the default paytype for the department
+
+
+
+            return true;
+        }
+
+       private static bool addLinesHelper(TimeClockContext db, Punch punch, Timecard tc, PayType pt, double weeklyWorked, double dailyWorked, DateTime splitStart, DateTime splitEnd, bool secenthDay)
+        {
+        // Determin the correct pay type for this line.
+
+        // Calculate dailyLeft and weeklyLeft
+
+        // Check if we reach over the weekly -- if
+
+           // If we do add the first part, recurse on what is left
+
+        // check if we are over daily max    -- else if
+
+           // if we are add the first part, recurse on what is left
+
+        // if we get here we can add with out any problems -- else
+
+
+           return true;
+       }
+
+    }
+    }
+
+
+    
 }

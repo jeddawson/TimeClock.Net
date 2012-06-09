@@ -76,6 +76,18 @@ namespace TimeClock.Models
         /* Many to Many */
         public virtual ICollection<Message> Messages { get; set; }
 
+        public int consecutiveDaysWorked(TimeClockContext db)
+        {
+
+            return 0;
+        }
+
+        public int consecutiveDaysWorkedHelper(TimeClockContext db, int days)
+        {
+
+            return 0;
+        }
+
         public int isWorking(TimeClockContext db)
         {
             PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, 1);
@@ -166,7 +178,7 @@ namespace TimeClock.Models
         public string       Location            { get; set; }
         
         public DateTime     PayPeriodSeed       { get; set; } //First day of the first payperiod.
-        public int          PayPeriodInterval   { get; set; }  //Number of days in a pay period.
+        public TimeSpan     PayPeriodInterval   { get; set; }  //Number of days in a pay period.
         public virtual Company Company          { get; set; }
 
         /* One to One */
@@ -226,6 +238,20 @@ namespace TimeClock.Models
         
         /* One to One */
         public virtual PayType NextPayType { get; set; }
+
+        public int getDailyMax(bool seventhDay)
+        {
+            if (seventhDay)
+                return SeventhDayMax;
+            else
+                return DailyMax;
+        }
+
+        public int getWeeklyMax(bool seventhDay)
+        {
+            return WeeklyMax;
+        }
+
     }
 
     public class Punch
@@ -292,6 +318,24 @@ namespace TimeClock.Models
         /* One to Many */
         [ForeignKey("TimecardID")]
         public virtual ICollection<Line> Lines { get; set; }
+
+        public DateTime getStartingDay(TimeClockContext db)
+        {
+            Employee emp = db.Employees.SingleOrDefault(e => e.EmployeeID.Equals(EmployeeID));
+
+            DateTime seed = emp.department.PayPeriodSeed;
+            TimeSpan len = emp.department.PayPeriodInterval;
+            
+
+            while ( DateTime.Now.Subtract(seed).TotalMinutes > 0)
+               seed.Add(len);
+
+            seed.Subtract(len);
+
+            return seed;
+            
+        }
+
     }
 
 }
