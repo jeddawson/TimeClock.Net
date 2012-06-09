@@ -9,6 +9,7 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using TimeClock.Formatters;
 using TimeClock.Models;
 
 namespace TimeClock
@@ -57,9 +58,12 @@ namespace TimeClock
             
             //Putting all of the CSS into a single file:
             BundleTable.Bundles.Add(BundleManager.CssBundle());
-            
-            //Extra JS file, only loaded by browsers that don't support HTML5
-            BundleTable.Bundles.Add(BundleManager.ModernizrBundle());
+
+            //Wipe out XML, who likes XML!?
+            GlobalConfiguration.Configuration.Formatters.XmlFormatter.SupportedMediaTypes.Clear();
+            //Enable a custom JSONP formatter, MS: this should be available by default!
+            GlobalConfiguration.Configuration.Formatters.Insert(0, new JsonpMediaTypeFormatter());
+
         }
     }
 }

@@ -1,112 +1,99 @@
 ﻿@model IEnumerable<TimeClock.Resources.ClockInitialItem>
 
 @{
-    ViewBag.Title = "Clock";
+    ViewBag.Title = "Main";
 }
 
 <div class="row">
-<div class="three columns">
-    <form class="custom" data-bind="submit: doPunch">
+<div class="twelve columns">
+    <form class="custom" data-bind="with: initialData">
     <fieldset>
         <h4>Time Clock</h4>
         <p>Select your name and enter your pin.</p>
         <div class="row">
-                <label>Name</label>
-                <select data-bind="
-                        options: availableEmployees,
-                        value: selectedEmployeeValue,
-                        valueUpdate: 'change',
-                        optionsText: 'EmployeeName', 
-                        optionsValue: 'EmployeeID', 
-                        optionsCaption: 'Choose...'">
-                </select>
-                <input type="hidden" data-bind="value: selectedEmployeeValue, event: { change: getStatus }" value="" />
+            <label>Name</label>
+            <!-- Employee List -->    
+            <select data-bind="
+                options: $data,
+                value: $root.selectedEmployeeValue,
+                valueUpdate: 'change',
+                optionsText: 'EmployeeName', 
+                optionsValue: 'EmployeeID', 
+                optionsCaption: 'Choose...'">
+            </select>
         </div>
         <div class="row">
             <label>Pin</label>
-            <input type="password" class="oversize input-text" id="pin" data-bind="value: employeePin" />
+            <input type="password" class="oversize input-text" id="pin" data-bind="value: $root.employeePin" />
         </div>
-        <div class="row"></div>
-        <div class="row">
-            <a href="#" class="large radius nice blue button" data-bind="click: doPunch, text: punchDirection"></a>
+        <div class="row" data-bind="with: $root.statusData">
+            <a href="#" class="large radius nice blue button" data-bind="click: $root.doPunch, text: punchDirection"></a>
         </div>
     </fieldset>
     </form>
-</div>
-<div class="nine columns">
-    <ul data-bind="foreach: lines, visable: lines().length > 0">
-        <li>
-            <span data-bind="text: date">&nbsp</span>
-            <span data-bind="text: inPunch">&nbsp</span>
-            <span data-bind="text: outPunch">&nbsp</span>
-            <span data-bind="text: entryTime">&nbsp</span>
-            <span data-bind="text: regularHours">&nbsp</span>
-            <span data-bind="text: overtimeHours">&nbsp</span>
-        </li>
-    </ul>
+    <!-- ko with: timecardData -->
+    <!-- "logged in" view goes here -->
+
+
+    <!-- /ko -->
 </div>
 </div>
 
 <script lang="text/javascript">
 
-   // Constructor for an line object
-    var line = function (data) {
-        this.date = ko.observable(data.date);
-        this.inPunch = ko.observable(data.inPunch); 
-        this.outPunch = ko.observable(data.outPunch);
-        this.entryTime = ko.observable(data.entryTime);
-        this.regularHours = ko.observable(data.regularHours);
-        this.overtimeHours = ko.observable(data.overtimeHours);
+    // Constructor for status object
+    var status = function (data) {
+        var me = this;
+        if(data.openPunch > 0 ) {
+            me.punchDirection   = ko.observable("Punch Out");
+            me.openPunch        = ko.observable(data.openPunch);
+        } else {
+            me.punchDirection   = ko.observable("Punch In");
+            me.openPunch        = ko.observable(undefined);
+        }
     };
 
     //The Knockout.js Model
     var TimecardViewModel = function() {
         var self = this; //prevent issues with callbacks by masking 'this'
         
-        //Non-editable employee array generated at run time.
-        self.availableEmployees = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.EmpList));
-        
-        self.selectedEmployeeValue = ko.observableArray([]);
-        
-        self.lines = ko.observableArray([]);       
-        
-        self.employeePin = ko.observable("");
-        
-        self.punchDirection = ko.observable("");
-        
-        self.openPunch = ko.observable("");
+        //Data
+        self.initialData    =   @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.EmpList));
+        self.statusData     =   ko.observable();
+        self.timecardData   =   ko.observable();
+        self.messageData    =   ko.observable();
+        self.historyData    =   ko.observable();
+        self.settingData    =   ko.observable();
 
-        self.employeePin.subscribe(function() {
+        //Initial Data Properties
+        self.selectedEmployeeValue  =   ko.observableArray([]);
+        self.employeePin            =   ko.observable("");
+
+        //Methods
+
+        self.employeePin.subscribe = function() {
             if(self.employeePin().length >= 4) {
                 //Nothing for now, eventually want to validate it on the fly!
             }
             return true;
-        });
+        };
 
         //Does the post back to the server with the employee's ID and pin.
         self.doPunch = function() {
             $.ajax("/REST/clock/punch", {
-                data: ko.toJSON({ employeeID: self.employeeID, pin: self.employeePin }),
-                type: "post", contentType: "application/json",
-                success: function(result) { process(result); },
-                failure: function(exception) { doValidation(exception);}
+                data:       ko.toJSON({ ID: self.employeeID, pin: self.employeePin, closesPunch: self.statusData.openPunch }),
+                type:       "post", contentType: "application/json",
+                success:    function(result) { self.timecardData = result; },
+                failure:    function(exception) { doValidation(exception);}
             });
         };
         
-        //When the internal value of selected employee changes, trigger the getStatus function
+        //When the internal value of selected employee changes, check the employee's status
         self.selectedEmployeeValue.subscribe(function() {
-            self.getStatus();
-        });
-
-        //Checks the employee's status
-        self.getStatus = function() {
             if(self.selectedEmployeeValue() != undefined) {
-                $.ajax("/REST/clock/status/" + self.selectedEmployeeValue(), {
-                    type: "get", contentType: "application/json",
-                    success: function(result) { self.updateStatus(result) }
-                });
+                $.get("/REST/clock/status/" + self.selectedEmployeeValue(), {}, self.statusData );
             }
-        };
+        });
 
         //Update the UI with new status information
         self.updateStatus = function(result) {
@@ -115,8 +102,16 @@
             self.lines( result.TimeCard.length ? result.TimeCard : "" );
         };
 
-    }
+        self.reset = function() {
+            self.timecardData(undefined);
+            self.messageData(undefined);
+            self.historyData(undefined);
+            self.settingData(undefined);
+            $.get("/REST/clock/list", "{}", self.initialData);
+        }
 
+    }
+    
     $(document).ready(function() { ko.applyBindings( new TimecardViewModel()); });
 
 </script>

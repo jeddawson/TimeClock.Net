@@ -24,7 +24,7 @@ namespace TimeClock.Controllers
          * 
         **/
 
-        public IEnumerable<ClockInitialItem> GetList()
+        public IEnumerable<ClockInitialItem> List()
         {
             using (var db = new TimeClockContext())
             {
@@ -36,9 +36,9 @@ namespace TimeClock.Controllers
                 {
                     employeeList.Add(new ClockInitialItem()
                     {
-                        EmployeeID      = e.EmployeeID,
-                        EmployeeName    = e.FirstName + " " + e.LastName,
-                        DepartmentID    = e.DepartmentID
+                        employeeID      =   e.EmployeeID,
+                        employeeName    =   e.FirstName + " " + e.LastName,
+                        departmentID    =   e.DepartmentID
                     });
                 }
 
@@ -68,12 +68,13 @@ namespace TimeClock.Controllers
                 if (employee == null)
                     throw new HttpResponseException(HttpStatusCode.NoContent);
 
+                var isWorking = employee.isWorking(db);
+
                 EmployeeStatus status = new EmployeeStatus()
                     {
                         EmployeeID  = id,
-                        openPunch   = employee.isWorking(db),
-                        NewMessages = employee.PendingMessages(db),
-                        Timecard    = employee.getTimeCardLines(db, payPeriod)
+                        punchDirection = (isWorking >= 0 ? "Punch Out" : "Punch In"),
+                        openPunch   = isWorking,
                     };
                 
                 return status;

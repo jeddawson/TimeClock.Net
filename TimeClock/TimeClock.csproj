@@ -144,6 +144,7 @@
     <Compile Include="Controllers\PunchController.cs" />
     <Compile Include="Controllers\StatusController.cs" />
     <Compile Include="Controllers\TimeclockController.cs" />
+    <Compile Include="Formatters\JsonpMediaTypeFormatter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -253,6 +254,7 @@
     <Content Include="Scripts\knockout.js" />
     <Content Include="Scripts\modernizr-2.5.3.js" />
     <Content Include="Scripts\modernizr.foundation.js" />
+    <Content Include="Scripts\sammy.min.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

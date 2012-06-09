@@ -17,10 +17,9 @@ namespace TimeClock.Resources
        
     public class EmployeeStatus
     {
-        public string EmployeeID { get; set; }
-        public int openPunch { get; set; }
-        public IEnumerable<Message> NewMessages { get; set; }
-        public IEnumerable<TimeCardView> Timecard { get; set; }
+        public string   EmployeeID      { get; set; }
+        public string   punchDirection  { get; set; }
+        public int      openPunch       { get; set; }
     }
 
 
@@ -37,24 +36,32 @@ namespace TimeClock.Resources
 
     public class PunchRequest
     {
-        public string Id { get; set; }
-        public string Pin { get; set; }
-        public int closesPunch { get; set; }
-        public string Timestamp { get; set; }
-        public string HMAC { get; set; }
+        public string   ID              { get; set; }
+        public string   pin             { get; set; }
+        public int      closesPunch     { get; set; }
+        public string   timestamp       { get; set; }
+        public string   HMAC            { get; set; }
+    }
+
+    public class PunchResponse
+    {
+        public TimeCardView timecardData { get; set; }
     }
 
     public class ClockInitialItem
     {
-        public string EmployeeName { get; set; }
-        public string EmployeeID { get; set; }
-        public int DepartmentID { get; set; }
+        public string   employeeName    { get; set; }
+        public string   employeeID      { get; set; }
+        public int      departmentID    { get; set; }
     }
 
-    public class MessageRead
+    public class MessageData
     {
-        public int MessageID { get; set; }
-        public string EmployeeID { get; set; }
+        public int      ID              { get; set; }
+        public string   from            { get; set; }
+        public string   subject         { get; set; }
+        public string   body            { get; set; }
+        public bool     isNew           { get; set; }
     }
 
 }
