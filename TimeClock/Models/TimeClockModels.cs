@@ -76,6 +76,12 @@ namespace TimeClock.Models
         /* Many to Many */
         public virtual ICollection<Message> Messages { get; set; }
 
+        public bool workedSixPriviousDays(TimeClockContext db)
+        {
+            return consecutiveDaysWorked(db) >= 6;
+        }
+
+
         public int consecutiveDaysWorked(TimeClockContext db)
         {
 
@@ -87,6 +93,19 @@ namespace TimeClock.Models
 
             return 0;
         }
+
+        public double minutsWorkedDate(TimeClockContext db, Timecard tc, DateTime date)
+        {
+            var lines = db.Lines.Where(l => l.TimecardID == tc.TimecardID && l.SplitStart.Subtract(date).TotalMinutes >= 0 && l.SplitEnd.Subtract(date.AddDays(1)).TotalMinutes <= 0);
+
+            double minutesWorked = 0;
+
+            foreach (Line line in lines)
+                minutesWorked += line.getDuration().TotalMinutes;
+
+            return minutesWorked;
+        }   
+
 
         public int isWorking(TimeClockContext db)
         {

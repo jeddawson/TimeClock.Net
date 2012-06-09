@@ -80,40 +80,132 @@ namespace TimeClock.Resources
     {
         public static bool addLines(TimeClockContext db, Punch punch) 
         {
-            PayPeriod payp = PayPeriodTools.LookupPayPeriod(db, );
-
             // determine payperiod
+            PayPeriod currentPayP = PayPeriodTools.LookupPayPeriod(db, punch.employee.department.DepartmentID);
+            Timecard currentTC = db.Timecards.SingleOrDefault(tc => tc.EmployeeID == punch.EmployeeID && tc.PayPeriod.Equals(currentPayP.Start));
+
             // check if we reach over payperiods
+            if (punch.InTime.Subtract(currentPayP.Start).TotalMinutes < 0) // We started in the previous payperiod
+            {
+                PayPeriod previousPayP = new PayPeriod()
+                    {
+                        Start = currentPayP.Start.Subtract(punch.employee.department.PayPeriodInterval),
+                        End = currentPayP.Start
+                    };
 
-                // if we do split accordingly and call addLinesTimecard
+                Timecard previousTC = db.Timecards.SingleOrDefault(tc => tc.EmployeeID == punch.EmployeeID && tc.PayPeriod.Equals(previousPayP.Start));
 
-            // just call addLinesTimecard
-            return true;
+                bool first = addLinesTimecard(db, punch, previousTC, punch.InTime, previousPayP.End);
+                bool second = addLinesTimecard(db, punch, currentTC, currentPayP.Start, punch.OutTime.Value);
 
+                return first && second;
+            }
+            else if (punch.OutTime.Value.Subtract(currentPayP.End).TotalMinutes > 0) // We ended in the next payperiod - Not sure this will ever happen
+            {
+                PayPeriod nextPayP = new PayPeriod()
+                    {
+                        Start = currentPayP.End,
+                        End = currentPayP.End.Add(punch.employee.department.PayPeriodInterval)
+                    };
+                Timecard nextTC = db.Timecards.SingleOrDefault(tc => tc.EmployeeID == punch.EmployeeID && tc.PayPeriod.Equals(nextPayP.Start));
+
+                bool first = addLinesTimecard(db, punch, currentTC, punch.InTime, currentPayP.End);
+                bool second = addLinesTimecard(db, punch, nextTC, nextPayP.Start, punch.OutTime.Value);
+
+                return first && second;
+            }
+            else // No over lap, we just add the whole punch to the current Time card
+            {
+                return addLinesTimecard(db, punch, currentTC, punch.InTime, punch.OutTime.Value);
+            }
+            
         }
 
+
+        /* This functions determine the weekly minuts worked, as well as the time that the current payday started.
+         * 
+         * This information is then used to call addLinesDaily(...);
+         */
+ 
         private static bool addLinesTimecard(TimeClockContext db, Punch punch, Timecard tc, DateTime splitStart, DateTime splitEnd)
         {
             // Calculate weeklyWorked, and dailyWorked
+            var lines = db.Lines.Where(l => l.TimecardID == tc.TimecardID);
 
+           double weeklyMinuts = 0;
+           foreach (Line line in lines)
+               weeklyMinuts += line.getDuration().TotalMinutes;
+
+           TimeSpan dayBeginTime = punch.employee.department.PayPeriodSeed.TimeOfDay;
+            DateTime currentDayStart = DateTime.Now.Date.Add(dayBeginTime);
+            
+            return addLinesDaily(db, punch, tc, splitStart, splitEnd, weeklyMinuts, currentDayStart);
+        }
+
+        /*
+         * this split up the punch to the different days that it happen, this is done recursively, and call allLinesHelper on the corresponding days
+         * 
+         */
+        private static bool addLinesDaily(TimeClockContext db, Punch punch, Timecard tc, DateTime splitStart, DateTime splitEnd, double weeklyWorked, DateTime dayStartTime)
+        {
             // Split on days
+            if(splitStart.Subtract(dayStartTime).TotalMinutes < 0) // the punch started on the previous day, split and call recursively
+            {
+                addLinesDaily(db, punch, tc, splitStart, dayStartTime, weeklyWorked, dayStartTime.AddDays(-1));
+                splitStart = dayStartTime; // To continue adding the rest of the punch
+            }
 
-                // Determine if special seventh day
 
-            // call addLinesHelper with the default paytype for the department
+            if(splitEnd.Subtract(dayStartTime.AddDays(1)).TotalMinutes < 0) // the punch ended today, we can safely add it
+            {
+                double dailyworked = punch.employee.minutsWorkedDate(db, tc, dayStartTime);
+                bool seventhDay = punch.employee.workedSixPriviousDays(db);
+                addLinesHelper(db, punch, tc, punch.employee.department.DefaultPayType, weeklyWorked, dailyworked, splitStart, splitEnd, seventhDay);
+            }
+            else // The punch ends on the next day
+            {
+                double dailyworked = punch.employee.minutsWorkedDate(db, tc, dayStartTime);
+                bool seventhDay = punch.employee.workedSixPriviousDays(db);
+                addLinesHelper(db, punch, tc, punch.employee.department.DefaultPayType, weeklyWorked, dailyworked, splitStart, dayStartTime.AddDays(1), seventhDay);
 
-
+                addLinesDaily(db, punch, tc, dayStartTime.AddDays(1), splitEnd, weeklyWorked, dayStartTime.AddDays(1));
+            }
 
             return true;
         }
+        
 
-       private static bool addLinesHelper(TimeClockContext db, Punch punch, Timecard tc, PayType pt, double weeklyWorked, double dailyWorked, DateTime splitStart, DateTime splitEnd, bool secenthDay)
+       private static bool addLinesHelper(TimeClockContext db, Punch punch, Timecard tc, PayType pt, double weeklyWorked, double dailyWorked, DateTime splitStart, DateTime splitEnd, bool seventhDay)
         {
         // Determin the correct pay type for this line.
+           while (weeklyWorked > pt.getWeeklyMax(seventhDay))
+               pt = pt.NextPayType;
+
+           while (dailyWorked > pt.getDailyMax(seventhDay))
+               pt = pt.NextPayType;
 
         // Calculate dailyLeft and weeklyLeft
+           double dailyLeft = (double) pt.getDailyMax(seventhDay) - dailyWorked;
+           double weeklyLeft = (double) pt.getWeeklyMax(seventhDay) - dailyWorked;
+
+           double splitLength = splitEnd.Subtract(splitStart).TotalMinutes;
+
 
         // Check if we reach over the weekly -- if
+           if (weeklyWorked + splitLength > pt.getWeeklyMax(seventhDay))
+           {
+               db.Lines.Add(new Line() 
+                    { 
+                    TimecardID = tc.TimecardID,
+                    PunchID = punch.PunchID,
+                    SplitStart = currentPunch.InTime,
+                    SplitEnd = currentPunch.OutTime.Value,
+                    }
+               );
+                                    db.SaveChanges();
+           }
+
+
 
            // If we do add the first part, recurse on what is left
 
