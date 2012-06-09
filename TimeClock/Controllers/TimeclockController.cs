@@ -23,9 +23,9 @@ namespace TimeClock.Controllers
             {
                 initialData.Add(new ClockInitialItem()
                 {
-                    EmployeeID = e.EmployeeID,
-                    EmployeeName = e.FirstName + " " + e.LastName,
-                    DepartmentID = e.DepartmentID
+                    employeeID = e.EmployeeID,
+                    employeeName = e.FirstName + " " + e.LastName,
+                    departmentID = e.DepartmentID
                 });
             }
    

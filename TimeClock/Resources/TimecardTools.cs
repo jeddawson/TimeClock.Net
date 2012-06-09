@@ -59,6 +59,14 @@ namespace TimeClock.Resources
         public int      departmentID    { get; set; }
     }
 
+    public class MessageRead
+    {
+        public int messageID { get; set; }
+        public string employeeID { get; set; }
+        public string timestamp { get; set; }
+        public string HMAC { get; set; }
+    }
+
     public class MessageData
     {
         public int      ID              { get; set; }

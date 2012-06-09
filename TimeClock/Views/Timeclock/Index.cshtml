@@ -25,7 +25,7 @@
         <div class="row" data-bind="css: { error: $root.isError() == true }">
             <label>Pin</label>
             <input type="password" class="oversize input-text" id="pin" data-bind="value: $root.employeePin" />
-            <small data-bind="if"
+            <small class="error" data-bind="visible: $root.pinError().length > 0, value: $root.pinError"></small>
         </div>
         <div class="row" data-bind="with: $root.statusData">
             <a href="#" class="large radius nice blue button" data-bind="click: $root.doPunch, text: punchDirection"></a>
@@ -70,6 +70,7 @@
         self.selectedEmployeeValue  =   ko.observableArray([]);
         self.employeePin            =   ko.observable("");
         self.isError                =   ko.observable(false);
+        self.pin                    =   ko.observable("");
         //Methods
 
         self.employeePin.subscribe = function() {
@@ -83,9 +84,9 @@
         self.doPunch = function() {
             $.ajax("/REST/clock/punch", {
                 data:       ko.toJSON({ ID: self.employeeID, pin: self.employeePin, closesPunch: self.statusData.openPunch }),
-                type:       "post", contentType: "application/json",
-                success:    function(result) { self.timecardData = result; },
-                failure:    function(exception) { doValidation(exception);}
+                type:       "post",             contentType: "application/json",
+                success:    function(result)    { processPunch(result); },
+                failure:    function(exception) { alert(exception);  }
             });
         };
         
@@ -113,14 +114,16 @@
 
     }
     
-    function process(data) {
+    function processPunch(data) {
         if(data.isSuccess) {
             TimecardViewModel.statusData(undefined);
             TimecardViewModel.timecardData = data.timecardData;
         } else {
             //Handle error
             TimecardViewModel.isError(true);
-
+            TimecardViewModel.pinError(data.pinError);
+            TimecardViewModel.generalError(data.generalError);
+            TimecardViewModel.timecardData(undefined);
         }
     }
 

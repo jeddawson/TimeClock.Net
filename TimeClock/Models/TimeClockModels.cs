@@ -63,14 +63,16 @@ namespace TimeClock.Models
         public string ManagerID { get; set; }
         [ForeignKey("ManagerID")]
         public virtual Employee Manager { get; set;}
-        
+        [ForeignKey("DepartmentID")]
+        public virtual Department department { get; set; }
+
         /* One to Many */
         public virtual ICollection<Punch> Punches { get; set; }
         [ForeignKey("EmployeeID")]
         public virtual ICollection<MessageViewed> ViewedMessages { get; set; }
         [ForeignKey("EmployeeID")]
         public virtual ICollection<Timecard> Timecards { get; set; }
-
+        
         /* Many to Many */
         public virtual ICollection<Message> Messages { get; set; }
 
