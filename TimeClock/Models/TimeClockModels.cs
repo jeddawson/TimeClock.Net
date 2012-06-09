@@ -262,7 +262,11 @@ namespace TimeClock.Models
         public int DepartmentID { get; set; }
         public string EmployeeID { get; set; }
         public int PunchTypeID { get; set; }
-
+    
+        /*One to One */
+        [ForeignKey("EmployeeID")]
+        public virtual Employee employee { get; set; }
+        
         /* One to Many */
         public virtual ICollection<Line> Lines { get; set; }
 
