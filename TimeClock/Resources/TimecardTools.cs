@@ -27,7 +27,7 @@ namespace TimeClock.Resources
      *  Inbound Request - Punch Request Definition
      *  
      *  Serializable class that allows JSON/XML objects to be serialized in the HTTP POST body.
-     *  Object should look like: [{ Id: "", Pin: "", closesPunch: 0, Timestamp: "", HMAC: "" }]
+     *  Object should look like: [{ Id: "", Pin: "", closesPunch: -1, Timestamp: "", HMAC: "" }]
      * 
      *  Any field can be ommited and the object will still serialize, however the relying code
      *  may not perform as expected.
@@ -45,6 +45,9 @@ namespace TimeClock.Resources
 
     public class PunchResponse
     {
+        public bool     isSuccess       { get; set; }
+        public string   pinError        { get; set; }
+        public string   generalError    { get; set; }
         public TimeCardView timecardData { get; set; }
     }
 

@@ -22,9 +22,10 @@
                 optionsCaption: 'Choose...'">
             </select>
         </div>
-        <div class="row">
+        <div class="row" data-bind="css: { error: $root.isError() == true }">
             <label>Pin</label>
             <input type="password" class="oversize input-text" id="pin" data-bind="value: $root.employeePin" />
+            <small data-bind="if"
         </div>
         <div class="row" data-bind="with: $root.statusData">
             <a href="#" class="large radius nice blue button" data-bind="click: $root.doPunch, text: punchDirection"></a>
@@ -68,7 +69,7 @@
         //Initial Data Properties
         self.selectedEmployeeValue  =   ko.observableArray([]);
         self.employeePin            =   ko.observable("");
-
+        self.isError                =   ko.observable(false);
         //Methods
 
         self.employeePin.subscribe = function() {
@@ -112,6 +113,17 @@
 
     }
     
+    function process(data) {
+        if(data.isSuccess) {
+            TimecardViewModel.statusData(undefined);
+            TimecardViewModel.timecardData = data.timecardData;
+        } else {
+            //Handle error
+            TimecardViewModel.isError(true);
+
+        }
+    }
+
     $(document).ready(function() { ko.applyBindings( new TimecardViewModel()); });
 
 </script>
