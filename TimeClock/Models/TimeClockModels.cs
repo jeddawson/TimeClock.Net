@@ -170,11 +170,8 @@ namespace TimeClock.Models
         public virtual Company Company          { get; set; }
 
         /* One to One */
-        [ForeignKey("PayTypeID")]
         public virtual PayType DefaultPayType       { get; set; }
-        [ForeignKey("PayTypeID")]
         public virtual PayType DefaultSickType      { get; set; }
-        [ForeignKey("PayTypeID")]
         public virtual PayType DefaultHolidayType   { get; set; }
 
         /* One to Many */

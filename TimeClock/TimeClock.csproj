@@ -160,6 +160,10 @@
     <Compile Include="Migrations\201206072334013_fixedMessageViewed.Designer.cs">
       <DependentUpon>201206072334013_fixedMessageViewed.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201206090525207_addDepartmentDefaultPayTypes.cs" />
+    <Compile Include="Migrations\201206090525207_addDepartmentDefaultPayTypes.Designer.cs">
+      <DependentUpon>201206090525207_addDepartmentDefaultPayTypes.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\TimeClockModels.cs" />
