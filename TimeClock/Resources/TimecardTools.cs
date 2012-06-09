@@ -194,16 +194,31 @@ namespace TimeClock.Resources
         // Check if we reach over the weekly -- if
            if (weeklyWorked + splitLength > pt.getWeeklyMax(seventhDay))
            {
-               db.Lines.Add(new Line() 
-                    { 
-                    TimecardID = tc.TimecardID,
-                    PunchID = punch.PunchID,
-                    SplitStart = currentPunch.InTime,
-                    SplitEnd = currentPunch.OutTime.Value,
-                    }
-               );
-                                    db.SaveChanges();
+               addLinesHelper(db, punch, tc, pt, weeklyWorked, dailyWorked, splitStart, splitStart.AddMinutes(weeklyLeft), seventhDay);
+               addLinesHelper(db, punch, tc, pt.NextPayType, weeklyWorked + weeklyLeft, dailyWorked + weeklyLeft, splitStart.AddMinutes(weeklyLeft), splitEnd, seventhDay);
            }
+               // Check if we reached over the daily limit
+           else if (dailyWorked + splitLength > pt.getDailyMax(seventhDay))
+           {
+               addLinesHelper(db, punch, tc, pt, weeklyWorked, dailyWorked, splitStart, splitStart.AddMinutes(dailyLeft), seventhDay);
+               addLinesHelper(db, punch, tc, pt.NextPayType, weeklyWorked + dailyLeft, dailyWorked + dailyLeft, splitStart.AddMinutes(dailyLeft), splitEnd, seventhDay);
+           }
+               // we can safely add the line to the DB
+           else 
+           {
+               db.Lines.Add(new Line()
+                    {
+                        TimecardID = tc.TimecardID,
+                        PunchID = punch.PunchID,
+                        SplitStart = splitStart,
+                        SplitEnd = splitEnd,
+                        PayTypeID = pt.PayTypeID
+                    });
+               db.SaveChanges();
+             
+           }
+
+
 
 
 

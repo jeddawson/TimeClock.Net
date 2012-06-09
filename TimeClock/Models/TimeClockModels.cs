@@ -320,6 +320,7 @@ namespace TimeClock.Models
         public DateTime SplitEnd { get; set; }
       
         public int PayTypeID { get; set; }
+
         [ForeignKey("PayTypeID")]
         public virtual PayType PayType { get; set; }
         [ForeignKey("PunchID")]
