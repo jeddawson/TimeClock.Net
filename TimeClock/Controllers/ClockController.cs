@@ -9,8 +9,20 @@ using System.Net;
 
 namespace TimeClock.Controllers
 {
+
     public class ClockController : ApiController
     {
+        private PayType Regular = new TimeClockContext().PayTypes.SingleOrDefault(pt => pt.Description.Equals("Regular"));
+        private PayType Overtime = new TimeClockContext().PayTypes.SingleOrDefault(pt => pt.Description.Equals("Overtime"));
+        
+        /*
+        private IEnumerable<PayType> PayTypes = new TimeClockContext().PayTypes.Where(pt => 
+               pt.Description.Equals("Regular") || 
+               pt.Description.Equals("Overtime")
+               ).AsEnumerable();
+        */
+
+
         // [GET] /REST/clock/getlist
 
         /** 
@@ -97,16 +109,99 @@ namespace TimeClock.Controllers
         **/
 
         [HttpPost]
-        public HttpResponseMessage Punch(PunchRequest request)
+        public HttpResponseMessage<PunchResponse> Punch(PunchRequest request)
         {
             using (var db = new TimeClockContext())
             {
                 /******************************************************************************    TODO ITEM    *********************************/
                 //This is where we need to insert the new punch for the employee
                 //If it is an out punch, we should recalculate their timecard lines. 
+                Employee emp = db.Employees.FirstOrDefault(e => e.EmployeeID.Equals(request.ID));
 
-                return new HttpResponseMessage(HttpStatusCode.Created);
-            }
+                if (!emp.Pin.Equals(request.pin))
+                {
+                    PunchResponse response = new PunchResponse()
+                    {
+                        isSuccess = false,
+                        pinError = "Pin and user did not match.",
+                        timecardData = null,
+                        generalError = null
+                    };
+
+                    return new HttpResponseMessage<PunchResponse>(response);
+
+                }
+                else
+                {
+                    if (request.closesPunch == -1)  // Create a new punch in the DB
+                    {
+                        Punch temp = new Punch()
+                        {
+                            EmployeeID = emp.EmployeeID,
+                            InTime = DateTime.Now,
+                            OutTime = null,
+                            DepartmentID = emp.DepartmentID,
+                            PunchTypeID = Constants.DEFAULT_PUNCH_TYPE // Make this equal to the Regular punch type.
+                            //OutTime = null;
+                        };
+
+                        db.Punches.Add(temp);
+                    }
+                    else // We need to close the last punch and make lines -- Make it split the lines over the payperiod seed
+                    {
+                        // Set the ending time of the punch
+                        Punch currentPunch = db.Punches.First(p => p.PunchID == request.closesPunch);
+                        currentPunch.OutTime = DateTime.Now;
+                        db.SaveChanges();
+
+                        // Update the lines for this punch 
+
+                        PayPeriod currentPayPeriod = PayPeriodTools.LookupPayPeriod(db, emp.department.DepartmentID, currentPunch.InTime);
+                        Timecard empTimecard = db.Timecards.SingleOrDefault(tc => tc.EmployeeID.Equals(emp.EmployeeID));
+                        PayType payType = emp
+
+                        var lines = db.Lines.Where(l => l.TimecardID == empTimecard.TimecardID);
+
+                        double weeklyHours = 0;
+                        foreach (Line line in lines)
+                            weeklyHours += line.getDuration().TotalMinutes;
+
+                        double dailyHours = 0;
+                        foreach (Line line in lines.Where(l =>
+                            l.SplitStart.Subtract(currentPunch.InTime).Days > 0 &&
+                            l.SplitStart.Subtract(currentPunch.InTime).Days < 1)
+                            )
+                        {
+                            dailyHours += line.getDuration().TotalMinutes;
+                        }
+
+
+                        
+                        if (currentPunch.OutTime < currentPayPeriod.Start.AddDays((double)emp.department.PayPeriodInterval)) // We don't need to split the punch over pay periods
+                        {
+                            if (weeklyHours > Regular.WeeklyMax)
+                            {
+                                Line newLine = new Line()
+                                {
+                                    PunchID = request.closesPunch,
+                                    TimecardID = empTimecard.TimecardID
+                                };
+                            }
+                        }
+
+                        
+
+
+                        
+                         
+                    }
+                
+                }
+                
+                
+
+
+                     }
         }
 
         // [POST] /REST/clock/messageviewed
