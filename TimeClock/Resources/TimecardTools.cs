@@ -39,6 +39,7 @@ namespace TimeClock.Resources
         public string   ID              { get; set; }
         public string   pin             { get; set; }
         public int      closesPunch     { get; set; }
+        public int      departmentID    { get; set; }
         public string   timestamp       { get; set; }
         public string   HMAC            { get; set; }
     }
