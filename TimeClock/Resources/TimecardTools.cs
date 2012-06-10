@@ -81,11 +81,11 @@ namespace TimeClock.Resources
         public static bool addLines(TimeClockContext db, Punch punch) 
         {
             // determine payperiod
-            PayPeriod currentPayP = PayPeriodTools.LookupPayPeriod(db, punch.employee.department.DepartmentID);
+            PayPeriod currentPayP = PayPeriodTools.LookupPayPeriod(db, punch.employee.department.DepartmentID, punch.OutTime.Value);
             Timecard currentTC = db.Timecards.SingleOrDefault(tc => tc.EmployeeID == punch.EmployeeID && tc.PayPeriod.Equals(currentPayP.Start));
 
             // check if we reach over payperiods
-            if (punch.InTime.Subtract(currentPayP.Start).TotalMinutes < 0) // We started in the previous payperiod
+            if (punch.InTime.Subtract(currentPayP.Start).TotalMinutes < 0) // We started in the previous payperiod , solit the punch into two.
             {
                 PayPeriod previousPayP = new PayPeriod()
                     {

@@ -11,8 +11,8 @@ namespace TimeClock.Resources
         /* just whipped this up... need to test the logic and make sure we get the first day of the current pay period! */
         public static PayPeriod LookupPayPeriod(TimeClockContext db, int DepartmentID)
         {
-
-            Department depart = db.Departments.SingleOrDefault(d => d.DepartmentID == DepartmentID);
+            return LookupPayPeriod(db, DepartmentID, DateTime.Now);
+/*            Department depart = db.Departments.SingleOrDefault(d => d.DepartmentID == DepartmentID);
 
             DateTime seed = depart.PayPeriodSeed;
             int interval = depart.PayPeriodInterval;
@@ -26,18 +26,7 @@ namespace TimeClock.Resources
 
             payPeriod.End = payPeriod.Start.Add(TimeSpan.FromDays(interval));
 
-            return payPeriod;
-
-            /* // Before making the interval a timespan instead of an int
-           var seed = db.Departments.SingleOrDefault(d => d.DepartmentID == DepartmentID);
-
-           DateTime seedDate = seed.PayPeriodSeed;
-           int interval = seed.PayPeriodInterval;
-
-           TimeSpan span = DateTime.Now.Subtract(seedDate);
-
-           int count = (int) Math.Floor(span.TotalDays / (double) interval);
-           */
+            return payPeriod;*/
         }
 
         public static PayPeriod LookupPayPeriod(TimeClockContext db, int DepartmentID, DateTime time)
