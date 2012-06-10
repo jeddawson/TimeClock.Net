@@ -15,24 +15,16 @@ namespace TimeClock.Resources
             Department depart = db.Departments.SingleOrDefault(d => d.DepartmentID == DepartmentID);
 
             DateTime seed = depart.PayPeriodSeed;
-            int len = depart.PayPeriodInterval;
+            int interval = depart.PayPeriodInterval;
 
-            TimeSpan duration;
+            TimeSpan duration = DateTime.Now.Subtract(seed);
 
-            if (len > 0) duration = TimeSpan.FromDays(len);
-            else duration = TimeSpan.MaxValue;
-
-            var now = DateTime.Now;
-
-            while (DateTime.Now.Subtract(seed).TotalMinutes > 0)
-                seed.Add(duration);
-
-            seed.Subtract(duration);
+            int count = (int)Math.Floor(duration.TotalDays / (double)interval);
 
             PayPeriod payPeriod = new PayPeriod();
-            payPeriod.Start = seed;
+            payPeriod.Start = seed.Add(TimeSpan.FromDays(interval * count));
 
-            payPeriod.End = seed.Add(duration);
+            payPeriod.End = seed.Add(TimeSpan.FromDays(interval));
 
             return payPeriod;
 
