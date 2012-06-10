@@ -144,6 +144,7 @@ namespace TimeClock.Controllers
                         };
 
                         db.Punches.Add(temp);
+                        db.SaveChanges();
                     }
                     else // We need to close the last punch and make lines -- Make it split the lines over the payperiod seed
                     {

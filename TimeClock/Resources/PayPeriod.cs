@@ -24,7 +24,7 @@ namespace TimeClock.Resources
             PayPeriod payPeriod = new PayPeriod();
             payPeriod.Start = seed.Add(TimeSpan.FromDays(interval * count));
 
-            payPeriod.End = seed.Add(TimeSpan.FromDays(interval));
+            payPeriod.End = payPeriod.Start.Add(TimeSpan.FromDays(interval));
 
             return payPeriod;
 
