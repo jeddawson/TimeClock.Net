@@ -195,6 +195,20 @@ namespace TimeClock.Models
         public bool rebuildTimecardLines(TimeClockContext db, Timecard tc)
         {
             var lines = db.Lines.Where(l => l.TimecardID == tc.TimecardID);
+
+            var punches = db.Punches.Where(p => lines.Any(l => l.PunchID == p.PunchID));
+
+            lines = db.Lines.Where(l => punches.Any(p => p.PunchID == l.PunchID));
+
+            foreach (Line line in lines)
+                db.Lines.Remove(line);
+
+            db.SaveChanges();
+
+            foreach (Punch punch in punches)
+                Calculations.addLines(db, punch);
+
+           /*
             List<Punch> punches = new List<Punch>();
 
             foreach (Line line in lines)
@@ -212,7 +226,7 @@ namespace TimeClock.Models
             // Add all the lines for all the punches removed.
             foreach (Punch punch in punches)
                 Calculations.addLines(db, punch);
-
+            */
             return true;
         }
 
