@@ -130,13 +130,13 @@ namespace TimeClock.Models
             DateTime weekStart = seed.Add(TimeSpan.FromDays(interval * count));
 
             //Get the current payperiod
-            PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, DepartmentID);
+            PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, DepartmentID, weekStart);
 
             //Get the current time card and the next
             var timecards = db.Timecards.Where(tc => tc.EmployeeID == EmployeeID && tc.PayPeriod.Equals(payPeriod.Start)).ToList(); 
             
             // If we are ahead in time, add the next timecard if it exist
-            if (DateTime.Now.Subtract(payPeriod.End).TotalDays >= 0)
+            if (date.Subtract(payPeriod.End).TotalDays >= 0)
                 timecards.Concat( db.Timecards.Where(tc => tc.EmployeeID == EmployeeID && tc.PayPeriod.Equals(payPeriod.End)));
             
             //Get all lines for this timecard
@@ -144,9 +144,11 @@ namespace TimeClock.Models
             var lines = db.Lines.Where(l => l.TimecardID == curTimecardID).ToList();
 
             // If a second timecard was found add the lines from it aswell
-            var nextTimecardID = timecards.ElementAt(1).TimecardID;
-            if (timecards.Count() > 1 && DateTime.Now.Subtract(payPeriod.End).TotalDays >= 0)
-                lines.Concat( db.Lines.Where(l => l.TimecardID == nextTimecardID));
+            if (timecards.Count() > 1)
+            {
+                var nextTimecardID = timecards.ElementAt(1).TimecardID;
+                lines.Concat(db.Lines.Where(l => l.TimecardID == nextTimecardID));
+            }
 
             //Need to remove the lines that don't match our logic, LINQ wasn't a fan of this so just pull them out one at a time.
             foreach (Line line in lines)
