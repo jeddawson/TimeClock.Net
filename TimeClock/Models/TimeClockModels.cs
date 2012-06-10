@@ -88,8 +88,9 @@ namespace TimeClock.Models
             return 0;
         }
 
-        public int consecutiveDaysWorkedHelper(TimeClockContext db, int days)
+        private int consecutiveDaysWorkedHelper(TimeClockContext db, int days)
         {
+
 
             return 0;
         }
@@ -189,6 +190,30 @@ namespace TimeClock.Models
             }
 
             return myMessages.AsEnumerable();
+        }
+
+        public bool rebuildTimecardLines(TimeClockContext db, Timecard tc)
+        {
+            var lines = db.Lines.Where(l => l.TimecardID == tc.TimecardID);
+            List<Punch> punches = new List<Punch>();
+
+            foreach (Line line in lines)
+            {
+                // Add the punch to a list of punches that needs to be redone
+                if (! punches.Contains(line.Punch))
+                    punches.Add(line.Punch);
+
+                // Remove the line from the db
+                db.Lines.Remove(line);
+            }
+
+            db.SaveChanges(); // All the lines for this payperiod is removed
+
+            // Add all the lines for all the punches removed.
+            foreach (Punch punch in punches)
+                Calculations.addLines(db, punch);
+
+            return true;
         }
 
         public IEnumerable<TimeCardView> getTimeCardLines(TimeClockContext db, PayPeriod payPeriod)

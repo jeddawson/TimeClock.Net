@@ -175,7 +175,7 @@ namespace TimeClock.Resources
 
        private static bool addLinesHelper(TimeClockContext db, Punch punch, Timecard tc, PayType pt, double weeklyWorked, double dailyWorked, DateTime splitStart, DateTime splitEnd, bool seventhDay)
         {
-            // a simple base case, to stop spawing extra lines
+            // a simple base case, to stop spawing extra lines -- Not sure if this is needed
             if (splitStart.Subtract(splitEnd).TotalMinutes == 0)
                 return true;
 
