@@ -89,7 +89,7 @@ namespace TimeClock.Resources
             {
                 PayPeriod previousPayP = new PayPeriod()
                     {
-                        Start = currentPayP.Start.Subtract(punch.employee.department.PayPeriodInterval),
+                        Start = currentPayP.Start.Subtract(TimeSpan.FromDays(punch.employee.department.PayPeriodInterval)),
                         End = currentPayP.Start
                     };
 
@@ -105,7 +105,7 @@ namespace TimeClock.Resources
                 PayPeriod nextPayP = new PayPeriod()
                     {
                         Start = currentPayP.End,
-                        End = currentPayP.End.Add(punch.employee.department.PayPeriodInterval)
+                        End = currentPayP.End.Add(TimeSpan.FromDays(punch.employee.department.PayPeriodInterval))
                     };
                 Timecard nextTC = db.Timecards.SingleOrDefault(tc => tc.EmployeeID == punch.EmployeeID && tc.PayPeriod.Equals(nextPayP.Start));
 
@@ -235,8 +235,4 @@ namespace TimeClock.Resources
        }
 
     }
-    }
-
-
-    
 }

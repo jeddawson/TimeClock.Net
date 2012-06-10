@@ -11,23 +11,28 @@ namespace TimeClock.Resources
         /* just whipped this up... need to test the logic and make sure we get the first day of the current pay period! */
         public static PayPeriod LookupPayPeriod(TimeClockContext db, int DepartmentID)
         {
+
             Department depart = db.Departments.SingleOrDefault(d => d.DepartmentID == DepartmentID);
 
             DateTime seed = depart.PayPeriodSeed;
-            TimeSpan len = depart.PayPeriodInterval;
-            
+            int len = depart.PayPeriodInterval;
+
+            TimeSpan duration;
+
+            if (len > 0) duration = TimeSpan.FromDays(len);
+            else duration = TimeSpan.MaxValue;
+
+            var now = DateTime.Now;
 
             while (DateTime.Now.Subtract(seed).TotalMinutes > 0)
-                seed.Add(len);
+                seed.Add(duration);
 
-            seed.Subtract(len);
+            seed.Subtract(duration);
 
-
-           
             PayPeriod payPeriod = new PayPeriod();
             payPeriod.Start = seed;
 
-            payPeriod.End = seed.Add( len );
+            payPeriod.End = seed.Add(duration);
 
             return payPeriod;
 

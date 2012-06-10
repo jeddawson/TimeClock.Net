@@ -76,8 +76,6 @@ namespace TimeClock.Models
         /* Many to Many */
         public virtual ICollection<Message> Messages { get; set; }
 
-<<<<<<< HEAD
-=======
         public bool workedSixPriviousDays(TimeClockContext db)
         {
             return consecutiveDaysWorked(db) >= 6;
@@ -108,15 +106,13 @@ namespace TimeClock.Models
             return minutesWorked;
         }   
 
-
->>>>>>> 4c9e8c5b674358a7b91d278eb711d1a737bd6f96
         public int isWorking(TimeClockContext db)
         {
             PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, 1);
 
-            var empPunches = db.Punches.Where(p => p.EmployeeID == EmployeeID && p.InTime > payPeriod.Start && p.InTime < payPeriod.End);
+            var empPunches = db.Punches.Where(p => p.EmployeeID == EmployeeID && p.InTime > payPeriod.Start && p.InTime < payPeriod.End && p.OutTime == null);
             if (empPunches.Count(p => p.OutTime == null) != 0)
-                if( DateTime.Now.Subtract( empPunches.Last().InTime ) < TimeSpan.FromHours(12) )
+                if( DateTime.Now.Subtract( empPunches.Last().InTime ) < TimeSpan.FromHours(24) )
                     return empPunches.Last().PunchID;
 
             return -1;
@@ -200,11 +196,7 @@ namespace TimeClock.Models
         public string       Location            { get; set; }
         
         public DateTime     PayPeriodSeed       { get; set; } //First day of the first payperiod.
-<<<<<<< HEAD
         public int          PayPeriodInterval   { get; set; }  //Number of days in a pay period.
-=======
-        public TimeSpan     PayPeriodInterval   { get; set; }  //Number of days in a pay period.
->>>>>>> 4c9e8c5b674358a7b91d278eb711d1a737bd6f96
         public virtual Company Company          { get; set; }
 
         /* One to One */
@@ -355,13 +347,17 @@ namespace TimeClock.Models
             Employee emp = db.Employees.SingleOrDefault(e => e.EmployeeID.Equals(EmployeeID));
 
             DateTime seed = emp.department.PayPeriodSeed;
-            TimeSpan len = emp.department.PayPeriodInterval;
-            
+            int len = emp.department.PayPeriodInterval;
 
+            TimeSpan duration;
+
+            if (len > 0) duration = TimeSpan.FromDays(len);
+            else duration = TimeSpan.MaxValue;
+           
             while ( DateTime.Now.Subtract(seed).TotalMinutes > 0)
-               seed.Add(len);
+               seed.Add(duration);
 
-            seed.Subtract(len);
+            seed.Subtract(duration);
 
             return seed;
             

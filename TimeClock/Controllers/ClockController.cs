@@ -73,7 +73,7 @@ namespace TimeClock.Controllers
 
                 Employee employee = db.Employees.SingleOrDefault(e => e.EmployeeID == id);
 
-                PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, Constants.DEFAULT_DEPARTMENT);
+                //PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, Constants.DEFAULT_DEPARTMENT);
 
                 if (employee == null)
                     throw new HttpResponseException(HttpStatusCode.NoContent);
@@ -212,9 +212,15 @@ namespace TimeClock.Controllers
 
                 }
 
+                PunchResponse retVal = new PunchResponse()
+                {
+                    isSuccess = true,
+                    pinError = "",
+                    timecardData = null,
+                    generalError = null
+                };
 
-
-
+                return new HttpResponseMessage<PunchResponse>(retVal);
             }
         }
 
