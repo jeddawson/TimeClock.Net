@@ -76,6 +76,40 @@ namespace TimeClock.Models
         /* Many to Many */
         public virtual ICollection<Message> Messages { get; set; }
 
+<<<<<<< HEAD
+=======
+        public bool workedSixPriviousDays(TimeClockContext db)
+        {
+            return consecutiveDaysWorked(db) >= 6;
+        }
+
+
+        public int consecutiveDaysWorked(TimeClockContext db)
+        {
+
+            return 0;
+        }
+
+        public int consecutiveDaysWorkedHelper(TimeClockContext db, int days)
+        {
+
+            return 0;
+        }
+
+        public double minutsWorkedDate(TimeClockContext db, Timecard tc, DateTime date)
+        {
+            var lines = db.Lines.Where(l => l.TimecardID == tc.TimecardID && l.SplitStart.Subtract(date).TotalMinutes >= 0 && l.SplitEnd.Subtract(date.AddDays(1)).TotalMinutes <= 0);
+
+            double minutesWorked = 0;
+
+            foreach (Line line in lines)
+                minutesWorked += line.getDuration().TotalMinutes;
+
+            return minutesWorked;
+        }   
+
+
+>>>>>>> 4c9e8c5b674358a7b91d278eb711d1a737bd6f96
         public int isWorking(TimeClockContext db)
         {
             PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, 1);
@@ -166,7 +200,11 @@ namespace TimeClock.Models
         public string       Location            { get; set; }
         
         public DateTime     PayPeriodSeed       { get; set; } //First day of the first payperiod.
+<<<<<<< HEAD
         public int          PayPeriodInterval   { get; set; }  //Number of days in a pay period.
+=======
+        public TimeSpan     PayPeriodInterval   { get; set; }  //Number of days in a pay period.
+>>>>>>> 4c9e8c5b674358a7b91d278eb711d1a737bd6f96
         public virtual Company Company          { get; set; }
 
         /* One to One */
@@ -226,6 +264,20 @@ namespace TimeClock.Models
         
         /* One to One */
         public virtual PayType NextPayType { get; set; }
+
+        public int getDailyMax(bool seventhDay)
+        {
+            if (seventhDay)
+                return SeventhDayMax;
+            else
+                return DailyMax;
+        }
+
+        public int getWeeklyMax(bool seventhDay)
+        {
+            return WeeklyMax;
+        }
+
     }
 
     public class Punch
@@ -236,11 +288,11 @@ namespace TimeClock.Models
         public int DepartmentID { get; set; }
         public string EmployeeID { get; set; }
         public int PunchTypeID { get; set; }
-
+    
         /*One to One */
         [ForeignKey("EmployeeID")]
         public virtual Employee employee { get; set; }
-
+        
         /* One to Many */
         public virtual ICollection<Line> Lines { get; set; }
 
@@ -275,6 +327,7 @@ namespace TimeClock.Models
         public DateTime SplitEnd { get; set; }
       
         public int PayTypeID { get; set; }
+
         [ForeignKey("PayTypeID")]
         public virtual PayType PayType { get; set; }
         [ForeignKey("PunchID")]
@@ -296,6 +349,24 @@ namespace TimeClock.Models
         /* One to Many */
         [ForeignKey("TimecardID")]
         public virtual ICollection<Line> Lines { get; set; }
+
+        public DateTime getStartingDay(TimeClockContext db)
+        {
+            Employee emp = db.Employees.SingleOrDefault(e => e.EmployeeID.Equals(EmployeeID));
+
+            DateTime seed = emp.department.PayPeriodSeed;
+            TimeSpan len = emp.department.PayPeriodInterval;
+            
+
+            while ( DateTime.Now.Subtract(seed).TotalMinutes > 0)
+               seed.Add(len);
+
+            seed.Subtract(len);
+
+            return seed;
+            
+        }
+
     }
 
 }

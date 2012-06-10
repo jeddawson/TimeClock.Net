@@ -11,21 +11,36 @@ namespace TimeClock.Resources
         /* just whipped this up... need to test the logic and make sure we get the first day of the current pay period! */
         public static PayPeriod LookupPayPeriod(TimeClockContext db, int DepartmentID)
         {
-            var seed = db.Departments.SingleOrDefault(d => d.DepartmentID == DepartmentID);
+            Department depart = db.Departments.SingleOrDefault(d => d.DepartmentID == DepartmentID);
 
-            DateTime seedDate = seed.PayPeriodSeed;
-            int interval = seed.PayPeriodInterval;
+            DateTime seed = depart.PayPeriodSeed;
+            TimeSpan len = depart.PayPeriodInterval;
+            
 
-            TimeSpan span = DateTime.Now.Subtract(seedDate);
+            while (DateTime.Now.Subtract(seed).TotalMinutes > 0)
+                seed.Add(len);
 
-            int count = (int) Math.Floor(span.TotalDays / (double) interval);
+            seed.Subtract(len);
 
+
+           
             PayPeriod payPeriod = new PayPeriod();
-            payPeriod.Start = seedDate.AddDays(count * interval);
+            payPeriod.Start = seed;
 
-            payPeriod.End = seedDate.AddDays( ( (count + 1) * interval ) - 1 ) ;
+            payPeriod.End = seed.Add( len );
 
             return payPeriod;
+
+            /* // Before making the interval a timespan instead of an int
+           var seed = db.Departments.SingleOrDefault(d => d.DepartmentID == DepartmentID);
+
+           DateTime seedDate = seed.PayPeriodSeed;
+           int interval = seed.PayPeriodInterval;
+
+           TimeSpan span = DateTime.Now.Subtract(seedDate);
+
+           int count = (int) Math.Floor(span.TotalDays / (double) interval);
+           */
         }
 
         public static PayPeriod LookupPayPeriod(TimeClockContext db, int DepartmentID, DateTime time)
