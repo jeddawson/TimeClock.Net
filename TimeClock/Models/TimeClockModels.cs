@@ -272,14 +272,14 @@ namespace TimeClock.Models
         public int getDailyMax(bool seventhDay)
         {
             if (seventhDay)
-                return SeventhDayMax;
+                return SeventhDayMax * 60;
             else
-                return DailyMax;
+                return DailyMax * 60;
         }
 
         public int getWeeklyMax(bool seventhDay)
         {
-            return WeeklyMax;
+            return WeeklyMax * 60;
         }
 
     }
