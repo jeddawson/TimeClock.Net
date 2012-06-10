@@ -132,13 +132,10 @@ namespace TimeClock.Resources
             // Calculate weeklyWorked, and dailyWorked
             var lines = db.Lines.Where(l => l.TimecardID == tc.TimecardID);
 
-           double weeklyMinuts = 0; // This is calculated incorrectly!
-           foreach (Line line in lines)
-               weeklyMinuts += line.getDuration().TotalMinutes;
+           double weeklyMinuts = punch.employee.minutsWorkedWeek(db, splitStart); 
 
            TimeSpan dayBeginTime = punch.employee.department.PayPeriodSeed.TimeOfDay;
            DateTime currentDayStart = DateTime.Now.Date.Add(dayBeginTime);
-           
             
             return addLinesDaily(db, punch, tc, splitStart, splitEnd, weeklyMinuts, currentDayStart);
         }
@@ -222,19 +219,6 @@ namespace TimeClock.Resources
                db.SaveChanges();
              
            }
-
-
-
-
-
-           // If we do add the first part, recurse on what is left
-
-        // check if we are over daily max    -- else if
-
-           // if we are add the first part, recurse on what is left
-
-        // if we get here we can add with out any problems -- else
-
 
            return true;
        }

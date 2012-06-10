@@ -113,7 +113,54 @@ namespace TimeClock.Models
                 minutesWorked += line.getDuration().TotalMinutes;
 
             return minutesWorked;
-        }   
+        }
+
+        public double minutsWorkedWeek(TimeClockContext db, DateTime date)
+        {
+
+            // Determine the Date of the start of the current week
+            DateTime seed = department.PayPeriodSeed;
+            int interval = 7; // One week, so we can find the current start
+
+            TimeSpan duration = date.Subtract(seed);
+
+            int count = (int)Math.Floor(duration.TotalDays / (double)interval);
+
+            DateTime weekStart = seed.Add(TimeSpan.FromDays(interval * count));
+
+            //Get the current payperiod
+            PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, DepartmentID);
+
+            //Get the current time card and the next
+            var timecards = db.Timecards.Where(tc => tc.EmployeeID == EmployeeID && tc.PayPeriod.Equals(payPeriod.Start)); 
+            
+            // If we are ahead in time, add the next timecard if it exist
+            if (DateTime.Now.Subtract(payPeriod.End).TotalDays >= 0)
+                timecards.Concat( db.Timecards.Where(tc => tc.EmployeeID == EmployeeID && tc.PayPeriod.Equals(payPeriod.End));
+            
+            //Get all lines for this timecard
+            var lines = db.Lines.Where(l => l.TimecardID == timecards.ElementAt(0).TimecardID).ToList();
+
+            // If a second timecard was found add the lines from it aswell
+            if (timecards.Count() > 1 && DateTime.Now.Subtract(payPeriod.End).TotalDays >= 0)
+                lines.Concat( db.Lines.Where(l => l.TimecardID == timecards.ElementAt(1).TimecardID));
+
+            //Need to remove the lines that don't match our logic, LINQ wasn't a fan of this so just pull them out one at a time.
+            foreach (Line line in lines)
+            {
+                if (!(line.SplitStart.Subtract(weekStart).TotalMinutes >= 0 && line.SplitEnd.Subtract(weekStart.AddDays(7)).TotalMinutes <= 0))
+                    lines.Remove(line);
+            }
+
+            // Count the minutes worked during the following week.
+            double minutesWorked = 0;
+
+            foreach (Line line in lines)
+                minutesWorked += line.getDuration().TotalMinutes;
+
+            return minutesWorked;
+        }
+
 
         public int isWorking(TimeClockContext db)
         {
