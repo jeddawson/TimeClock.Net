@@ -250,7 +250,7 @@ namespace TimeClock.Controllers
 
                 return new HttpResponseMessage<PunchResponse>(retVal);
             }
-        }
+        
 
         // [POST] /REST/clock/messageviewed
 
@@ -263,7 +263,7 @@ namespace TimeClock.Controllers
          *  See TimecardTool -> MessageRead for a definition of the expected POST body
          * 
         **/
-
+    
         [HttpPost]
         public HttpResponseMessage MessageViewed(MessageRead request)
         {
