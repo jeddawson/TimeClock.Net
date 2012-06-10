@@ -155,101 +155,28 @@ namespace TimeClock.Controllers
                         db.SaveChanges();
 
                         Calculations.addLines(db, currentPunch);
-                        
-                        /*
-                        // Update the lines for this punch 
-
-                        PayPeriod currentPayPeriod = PayPeriodTools.LookupPayPeriod(db, emp.department.DepartmentID, currentPunch.InTime);
-                        Timecard empTimecard = db.Timecards.SingleOrDefault(tc => tc.EmployeeID.Equals(emp.EmployeeID) && tc.PayPeriod == currentPayPeriod.Start);
-
-                        //If the timecard doesn't exist we need to create one
-                        if (empTimecard == null)
-                        {
-                            db.Timecards.Add(new Timecard() { EmployeeID = emp.EmployeeID, PayPeriod = currentPayPeriod.Start });
-                            db.SaveChanges();
-                            empTimecard = db.Timecards.SingleOrDefault(tc => tc.EmployeeID.Equals(emp.EmployeeID) && tc.PayPeriod == currentPayPeriod.Start);
-                        }
-
-                        PayType payType = emp.department.DefaultPayType;
-
-                        var lines = db.Lines.Where(l => l.TimecardID == empTimecard.TimecardID);
-
-                        //Need to do something if lines is null!
-
-                        double weeklyMinutes = 0;
-                        foreach (Line line in lines)
-                            weeklyMinutes += line.getDuration().TotalMinutes;
-
-                        while (weeklyMinutes > payType.WeeklyMax)
-                            payType = payType.NextPayType;
-
-                        double dailyMinutes = 0; // This needs to be changed.
-
-                        /* Linq wasn't able to interprety this. Nothing wrong with your syntax, linq just isn't quite there yet.
-                         *  foreach (Line line in lines.Where(l =>
-                            l.SplitStart.Subtract(currentPunch.InTime).Days == 0 || 
-                            l.SplitStart.Subtract(currentPunch.InTime).Days == 1)
-                            )
-                         
-
-                        /* Got documenation on DateDiffDay here: http://msdn.microsoft.com/en-us/library/bb468730(v=vs.110).asp x
-
-                        var linesQuery = from l in lines
-                                         where SqlMethods.DateDiffDay(l.SplitStart, currentPunch.InTime) == 0
-                                            select l;
-
-                        foreach (Line line in linesQuery)
-                        {
-                            dailyMinutes += line.getDuration().TotalMinutes;
-                        }
-
-                        while (dailyMinutes > payType.DailyMax)
-                            payType = payType.NextPayType;
-
-                        
-                        if (currentPunch.OutTime < currentPayPeriod.Start.AddDays((double)emp.department.PayPeriodInterval)) // We don't need to split the punch over pay periods
-                        {
-                            double minutsWorkd = currentPunch.getDuration().TotalMinutes;
-                            double dailyMinutsLeft = payType.DailyMax - dailyMinutes;
-                            double weeklyMinutsLeft = payType.WeeklyMax - weeklyMinutes;
-
-
-
-                            /*
-                            if (weeklyMinuts + currentPunch.getDuration().TotalMinutes < payType.WeeklyMax) // No need to split due to weekly max
-                            {
-                                if (dailyMinuts + currentPunch.getDuration().TotalMinutes < payType.DailyMax) // No need to split due to daily max
-                                {
-                                    db.Lines.Add(new Line() 
-                                        { 
-                                        TimecardID = empTimecard.TimecardID,
-                                        PunchID = currentPunch.PunchID,
-                                        SplitStart = currentPunch.InTime,
-                                        SplitEnd = currentPunch.OutTime.Value,
-                                        }
-                                        );
-                                    db.SaveChanges();
-                                }
-
-                            }
-                            */
+                                  
 
                         }
 
                     }
 
-                }
+
+                var payPeriod = PayPeriodTools.LookupPayPeriod(db, emp.DepartmentID);
+                var curTimeCard = emp.Timecards.SingleOrDefault(tc => tc.PayPeriod == payPeriod.Start);
+                var timeCardData = db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart);
 
                 PunchResponse retVal = new PunchResponse()
                 {
                     isSuccess = true,
                     pinError = "",
-                    timecardData = null,
+                    timecardData = TimeCardView.LinesToTimeCardView(timeCardData),
                     generalError = null
                 };
-
+                 
                 return new HttpResponseMessage<PunchResponse>(retVal);
             }
+       }
         
 
         // [POST] /REST/clock/messageviewed

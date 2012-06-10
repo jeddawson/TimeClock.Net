@@ -76,7 +76,7 @@ namespace TimeClock.Models
         /* Many to Many */
         public virtual ICollection<Message> Messages { get; set; }
 
-        public bool workedSixPriviousDays(TimeClockContext db)
+        public bool workedSixPreviousDays(TimeClockContext db)
         {
             return consecutiveDaysWorked(db) >= 6;
         }
@@ -115,7 +115,7 @@ namespace TimeClock.Models
             return minutesWorked;
         }
 
-        public double minutsWorkedWeek(TimeClockContext db, DateTime date)
+        public double minutesWorkedWeek(TimeClockContext db, DateTime date)
         {
 
             // Determine the Date of the start of the current week

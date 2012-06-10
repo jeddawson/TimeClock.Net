@@ -132,7 +132,7 @@ namespace TimeClock.Resources
             // Calculate weeklyWorked, and dailyWorked
             var lines = db.Lines.Where(l => l.TimecardID == tc.TimecardID);
 
-           double weeklyMinuts = punch.employee.minutsWorkedWeek(db, splitStart); 
+           double weeklyMinuts = punch.employee.minutesWorkedWeek(db, splitStart); 
 
            TimeSpan dayBeginTime = punch.employee.department.PayPeriodSeed.TimeOfDay;
            DateTime currentDayStart = DateTime.Now.Date.Add(dayBeginTime);
@@ -157,13 +157,13 @@ namespace TimeClock.Resources
             if(splitEnd.Subtract(dayStartTime.AddDays(1)).TotalMinutes < 0) // the punch ended today, we can safely add it
             {
                 double dailyworked = punch.employee.minutsWorkedDate(db, tc, dayStartTime);
-                bool seventhDay = punch.employee.workedSixPriviousDays(db);
+                bool seventhDay = punch.employee.workedSixPreviousDays(db);
                 addLinesHelper(db, punch, tc, punch.employee.department.DefaultPayType, weeklyWorked, dailyworked, splitStart, splitEnd, seventhDay);
             }
             else // The punch ends on the next day
             {
                 double dailyworked = punch.employee.minutsWorkedDate(db, tc, dayStartTime);
-                bool seventhDay = punch.employee.workedSixPriviousDays(db);
+                bool seventhDay = punch.employee.workedSixPreviousDays(db);
                 addLinesHelper(db, punch, tc, punch.employee.department.DefaultPayType, weeklyWorked, dailyworked, splitStart, dayStartTime.AddDays(1), seventhDay);
 
                 addLinesDaily(db, punch, tc, dayStartTime.AddDays(1), splitEnd, weeklyWorked, dayStartTime.AddDays(1));
