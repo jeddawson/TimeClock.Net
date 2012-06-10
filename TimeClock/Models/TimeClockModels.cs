@@ -136,7 +136,7 @@ namespace TimeClock.Models
             
             // If we are ahead in time, add the next timecard if it exist
             if (DateTime.Now.Subtract(payPeriod.End).TotalDays >= 0)
-                timecards.Concat( db.Timecards.Where(tc => tc.EmployeeID == EmployeeID && tc.PayPeriod.Equals(payPeriod.End));
+                timecards.Concat( db.Timecards.Where(tc => tc.EmployeeID == EmployeeID && tc.PayPeriod.Equals(payPeriod.End)));
             
             //Get all lines for this timecard
             var lines = db.Lines.Where(l => l.TimecardID == timecards.ElementAt(0).TimecardID).ToList();
