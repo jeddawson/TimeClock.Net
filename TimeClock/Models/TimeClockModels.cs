@@ -111,10 +111,14 @@ namespace TimeClock.Models
             PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, 1);
 
             var empPunches = db.Punches.Where(p => p.EmployeeID == EmployeeID && p.InTime > payPeriod.Start && p.InTime < payPeriod.End && p.OutTime == null);
+                       
             if (empPunches.Count(p => p.OutTime == null) != 0)
-                if( DateTime.Now.Subtract( empPunches.Last().InTime ) < TimeSpan.FromHours(24) )
-                    return empPunches.Last().PunchID;
-
+            {
+                var lastPunch = empPunches.OrderBy(p => p.InTime).AsEnumerable().Last();
+           
+                if (DateTime.Now.Subtract(lastPunch.InTime) < TimeSpan.FromHours(24))
+                    return lastPunch.PunchID;
+            }
             return -1;
         }
 
@@ -158,7 +162,7 @@ namespace TimeClock.Models
                         timecard[last].Overtime = line.SplitEnd.Subtract(line.SplitStart).TotalHours;
                     else if (line.PayType.Description == "Regular")
                         timecard[last].Regular = line.SplitEnd.Subtract(line.SplitStart).TotalHours;
-                    else ;
+                    //else ;
 
                     timecard[last].updateEntry();
                 }
@@ -171,8 +175,7 @@ namespace TimeClock.Models
                         temp.Regular = line.SplitStart.Subtract(line.SplitEnd).TotalHours;
                     else if (line.PayType.Description == "Overtime")
                         temp.Overtime = line.SplitStart.Subtract(line.SplitEnd).TotalHours;
-                    else
-                        ;// What should we do if it is neither of the two?
+                    //else ;// What should we do if it is neither of the two?
 
                     timecard.Add(temp);
                 }

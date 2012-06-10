@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data.Linq.SqlClient;
 using System.Net.Http;
 using System.Web.Http;
 using TimeClock.Resources;
@@ -156,36 +157,58 @@ namespace TimeClock.Controllers
                         // Update the lines for this punch 
 
                         PayPeriod currentPayPeriod = PayPeriodTools.LookupPayPeriod(db, emp.department.DepartmentID, currentPunch.InTime);
-                        Timecard empTimecard = db.Timecards.SingleOrDefault(tc => tc.EmployeeID.Equals(emp.EmployeeID));
+                        Timecard empTimecard = db.Timecards.SingleOrDefault(tc => tc.EmployeeID.Equals(emp.EmployeeID) && tc.PayPeriod == currentPayPeriod.Start);
+
+                        //If the timecard doesn't exist we need to create one
+                        if (empTimecard == null)
+                        {
+                            db.Timecards.Add(new Timecard() { EmployeeID = emp.EmployeeID, PayPeriod = currentPayPeriod.Start });
+                            db.SaveChanges();
+                            empTimecard = db.Timecards.SingleOrDefault(tc => tc.EmployeeID.Equals(emp.EmployeeID) && tc.PayPeriod == currentPayPeriod.Start);
+                        }
+
                         PayType payType = emp.department.DefaultPayType;
 
                         var lines = db.Lines.Where(l => l.TimecardID == empTimecard.TimecardID);
 
-                        double weeklyMinuts = 0;
-                        foreach (Line line in lines)
-                            weeklyMinuts += line.getDuration().TotalMinutes;
+                        //Need to do something if lines is null!
 
-                        while (weeklyMinuts > payType.WeeklyMax)
+                        double weeklyMinutes = 0;
+                        foreach (Line line in lines)
+                            weeklyMinutes += line.getDuration().TotalMinutes;
+
+                        while (weeklyMinutes > payType.WeeklyMax)
                             payType = payType.NextPayType;
 
-                        double dailyMinuts = 0; // This needs to be changed.
-                        foreach (Line line in lines.Where(l =>
-                            l.SplitStart.Subtract(currentPunch.InTime).Days > 0 &&
-                            l.SplitStart.Subtract(currentPunch.InTime).Days < 1)
+                        double dailyMinutes = 0; // This needs to be changed.
+
+                        /* Linq wasn't able to interprety this. Nothing wrong with your syntax, linq just isn't quite there yet.
+                         *  foreach (Line line in lines.Where(l =>
+                            l.SplitStart.Subtract(currentPunch.InTime).Days == 0 || 
+                            l.SplitStart.Subtract(currentPunch.InTime).Days == 1)
                             )
+                         */
+
+                        /* Got documenation on DateDiffDay here: http://msdn.microsoft.com/en-us/library/bb468730(v=vs.110).aspx */
+
+                        var linesQuery = from l in lines
+                                         where SqlMethods.DateDiffDay(l.SplitStart, currentPunch.InTime) == 0
+                                            select l;
+
+                        foreach (Line line in linesQuery)
                         {
-                            dailyMinuts += line.getDuration().TotalMinutes;
+                            dailyMinutes += line.getDuration().TotalMinutes;
                         }
 
-                        while (dailyMinuts > payType.DailyMax)
+                        while (dailyMinutes > payType.DailyMax)
                             payType = payType.NextPayType;
 
                         
                         if (currentPunch.OutTime < currentPayPeriod.Start.AddDays((double)emp.department.PayPeriodInterval)) // We don't need to split the punch over pay periods
                         {
                             double minutsWorkd = currentPunch.getDuration().TotalMinutes;
-                            double dailyMinutsLeft = payType.DailyMax - dailyMinuts;
-                            double weeklyMinutsLeft = payType.WeeklyMax - weeklyMinuts;
+                            double dailyMinutsLeft = payType.DailyMax - dailyMinutes;
+                            double weeklyMinutsLeft = payType.WeeklyMax - weeklyMinutes;
 
 
 
