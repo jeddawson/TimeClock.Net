@@ -177,6 +177,10 @@ namespace TimeClock.Resources
 
        private static bool addLinesHelper(TimeClockContext db, Punch punch, Timecard tc, PayType pt, double weeklyWorked, double dailyWorked, DateTime splitStart, DateTime splitEnd, bool seventhDay)
         {
+            // a simple base case, to stop spawing extra lines
+            if (splitStart.Subtract(splitEnd).TotalMinutes == 0)
+                return true;
+
         // Determin the correct pay type for this line.
            while (weeklyWorked > pt.getWeeklyMax(seventhDay))
                pt = pt.NextPayType;
