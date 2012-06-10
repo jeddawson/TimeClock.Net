@@ -9,5 +9,6 @@ namespace TimeClock.Resources
     {
         public static bool  PRODUCTION          = false;
         public static int   DEFAULT_DEPARTMENT  = 1;
+        public static int   DEFAULT_PUNCH_TYPE = 1;
     }
 }

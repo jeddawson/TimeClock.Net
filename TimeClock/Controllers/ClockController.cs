@@ -156,50 +156,43 @@ namespace TimeClock.Controllers
 
                         PayPeriod currentPayPeriod = PayPeriodTools.LookupPayPeriod(db, emp.department.DepartmentID, currentPunch.InTime);
                         Timecard empTimecard = db.Timecards.SingleOrDefault(tc => tc.EmployeeID.Equals(emp.EmployeeID));
-                        PayType payType = emp
+                        PayType payType = emp.department.DefaultPayType;
 
                         var lines = db.Lines.Where(l => l.TimecardID == empTimecard.TimecardID);
 
-                        double weeklyHours = 0;
+                        double weeklyMinuts = 0;
                         foreach (Line line in lines)
-                            weeklyHours += line.getDuration().TotalMinutes;
+                            weeklyMinuts += line.getDuration().TotalMinutes;
 
-                        double dailyHours = 0;
+                        while (weeklyMinuts > payType.WeeklyMax)
+                            payType = payType.NextPayType;
+
+                        double dailyMinuts = 0;
                         foreach (Line line in lines.Where(l =>
                             l.SplitStart.Subtract(currentPunch.InTime).Days > 0 &&
                             l.SplitStart.Subtract(currentPunch.InTime).Days < 1)
                             )
                         {
-                            dailyHours += line.getDuration().TotalMinutes;
+                            dailyMinuts += line.getDuration().TotalMinutes;
                         }
 
+                        while (dailyMinuts > payType.DailyMax)
+                            payType = payType.NextPayType;
 
                         
                         if (currentPunch.OutTime < currentPayPeriod.Start.AddDays((double)emp.department.PayPeriodInterval)) // We don't need to split the punch over pay periods
                         {
-                            if (weeklyHours > Regular.WeeklyMax)
-                            {
-                                Line newLine = new Line()
-                                {
-                                    PunchID = request.closesPunch,
-                                    TimecardID = empTimecard.TimecardID
-                                };
-                            }
+                            if(weeklyMinuts
                         }
 
-                        
-
-
-                        
-                         
                     }
-                
+
                 }
-                
-                
 
 
-                     }
+
+
+            }
         }
 
         // [POST] /REST/clock/messageviewed
@@ -226,4 +219,5 @@ namespace TimeClock.Controllers
             }
         }
     }
+>>>>>>> clientMods
 }
