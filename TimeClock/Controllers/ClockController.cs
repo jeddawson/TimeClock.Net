@@ -154,6 +154,9 @@ namespace TimeClock.Controllers
                         currentPunch.OutTime = DateTime.Now;
                         db.SaveChanges();
 
+                        Calculations.addLines(db, currentPunch);
+                        
+                        /*
                         // Update the lines for this punch 
 
                         PayPeriod currentPayPeriod = PayPeriodTools.LookupPayPeriod(db, emp.department.DepartmentID, currentPunch.InTime);
@@ -187,9 +190,9 @@ namespace TimeClock.Controllers
                             l.SplitStart.Subtract(currentPunch.InTime).Days == 0 || 
                             l.SplitStart.Subtract(currentPunch.InTime).Days == 1)
                             )
-                         */
+                         
 
-                        /* Got documenation on DateDiffDay here: http://msdn.microsoft.com/en-us/library/bb468730(v=vs.110).aspx */
+                        /* Got documenation on DateDiffDay here: http://msdn.microsoft.com/en-us/library/bb468730(v=vs.110).asp x
 
                         var linesQuery = from l in lines
                                          where SqlMethods.DateDiffDay(l.SplitStart, currentPunch.InTime) == 0
@@ -230,6 +233,7 @@ namespace TimeClock.Controllers
 
                             }
                             */
+
                         }
 
                     }
