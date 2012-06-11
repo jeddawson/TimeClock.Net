@@ -33,7 +33,22 @@
     </fieldset>
     </form>
     <!-- "logged in" view goes here -->
-    <table data-bind="with: timecardData">
+    <!-- ko with: employeeData -->
+    <ul class="nav-bar">
+        <li>
+            <a href="#" class="main">Time Card</a>
+        </li>
+        <li>
+            <a href="#" class="main">Messages</a>
+        </li>
+        <li>
+            <a href="#" class="main">History</a>
+        </li>
+        <li>
+            <a href="#" class="main">Log Out</a>
+        </li>
+    </ul>
+    <table data-bind="timecardData">
         <thead><tr><th>Date</th><th>In</th><th>Out</th><th>Entry</th><th>Regular</th><th>Overtime</th></tr></thead>
         <tbody data-bind="foreach: lines">
             <tr>
@@ -45,7 +60,8 @@
                 <td data-bind="text: OvertimeText"></td>
             </tr>
         </tbody>
-    </table> 
+    </table>
+    <!-- /ko --> 
 </div>
 </div>
 
@@ -67,8 +83,9 @@
     var TimecardViewModel = function() {
         var self = this;
         //Data
-        self.initialData    =   @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.EmpList));
+        self.initialData    =   ko.observableArray(@Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.EmpList)));
         self.statusData     =   ko.observable();
+        self.employeeData   =   ko.observable();
         self.timecardData   =   ko.observable();
         self.messageData    =   ko.observable();
         self.historyData    =   ko.observable();
@@ -107,11 +124,14 @@
         //Does the post back to the server with the employee's ID and pin.
         self.doPunch = function() {
             //$.post('/REST/clock/punch', ko.toJSON({ ID: self.selectedEmployeeValue(), pin: self.employeePin, closesPunch: self.statusData().openPunch }) , self.timecardData);
+            self.initialData(null);
+            self.employeeData = ko.observable(self.selectedEmployeeValue());
             $.ajax("/REST/clock/punch", {
-                data:       ko.toJSON({ ID: self.selectedEmployeeValue(), pin: self.employeePin, closesPunch: self.statusData().openPunch }),
-                type:       "post",             contentType: "application/json",
-                success:  self.timecardData ,
-                failure:    function(exception) { alert(exception)  }
+                data:        ko.toJSON({ ID: self.selectedEmployeeValue(), pin: self.employeePin, closesPunch: self.statusData().openPunch }),
+                type:        "post", 
+                contentType: "application/json",
+                success:     self.timecardData ,
+                failure:     function(exception) { alert(exception)  }
             });
         };
         
