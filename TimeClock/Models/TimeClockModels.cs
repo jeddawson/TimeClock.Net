@@ -95,8 +95,11 @@ namespace TimeClock.Models
             return 0;
         }
 
-        public double minutsWorkedDate(TimeClockContext db, Timecard tc, DateTime date)
+        public double minutsWorkedDate(TimeClockContext db, DateTime date)
         {
+            PayPeriod currentPP = PayPeriodTools.LookupPayPeriod(db, DepartmentID, date);
+            Timecard tc = db.Timecards.SingleOrDefault(t => t.PayPeriod.Equals(currentPP.Start) && t.EmployeeID.Equals(EmployeeID));
+
             //Get all lines for this timecard
             var allLines = db.Lines.Where(l => l.TimecardID == tc.TimecardID).ToList();
 
@@ -128,10 +131,19 @@ namespace TimeClock.Models
             int count = (int)Math.Floor(duration.TotalDays / (double)interval);
 
             DateTime weekStart = seed.Add(TimeSpan.FromDays(interval * count));
+            date = weekStart;
 
-            //Get the current payperiod
-            PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, DepartmentID, weekStart);
+            double minutesWorked = 0;
 
+            for (int i = 0; i <= interval; i++)
+            {
+                minutesWorked += minutsWorkedDate(db, date);
+                date.AddDays(1);
+            }
+
+            return minutesWorked;
+
+            /*
             //Get the current time card and the next
             var timecards = db.Timecards.Where(tc => tc.EmployeeID == EmployeeID && tc.PayPeriod.Equals(payPeriod.Start)).ToList(); 
             
@@ -156,14 +168,14 @@ namespace TimeClock.Models
                 if (!(line.SplitStart.Subtract(weekStart).TotalMinutes >= 0 && line.SplitEnd.Subtract(weekStart.AddDays(7)).TotalMinutes <= 0))
                     lines.Remove(line);
             }
-
+/*
             // Count the minutes worked during the following week.
             double minutesWorked = 0;
 
             foreach (Line line in lines)
                 minutesWorked += line.getDuration().TotalMinutes;
-
-            return minutesWorked;
+            
+            return minutesWorked; */
         }
 
 
@@ -206,6 +218,7 @@ namespace TimeClock.Models
                     where punches.Contains(l.Punch)
                     select l.LineID;
             List<int> lineList = lineIDs.ToList<int>();
+            
             if (lineList != null)
             {
                 //List<int> lineIDs = lines.Select(l => l.LineID).ToList<int>();

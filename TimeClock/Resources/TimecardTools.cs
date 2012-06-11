@@ -156,13 +156,13 @@ namespace TimeClock.Resources
 
             if(splitEnd.Subtract(dayStartTime.AddDays(1)).TotalMinutes < 0) // the punch ended today, we can safely add it
             {
-                double dailyworked = punch.employee.minutsWorkedDate(db, tc, dayStartTime);
+                double dailyworked = punch.employee.minutsWorkedDate(db, dayStartTime);
                 bool seventhDay = punch.employee.workedSixPreviousDays(db);
                 addLinesHelper(db, punch, tc, punch.employee.department.DefaultPayType, weeklyWorked, dailyworked, splitStart, splitEnd, seventhDay);
             }
             else // The punch ends on the next day
             {
-                double dailyworked = punch.employee.minutsWorkedDate(db, tc, dayStartTime);
+                double dailyworked = punch.employee.minutsWorkedDate(db, dayStartTime);
                 bool seventhDay = punch.employee.workedSixPreviousDays(db);
                 addLinesHelper(db, punch, tc, punch.employee.department.DefaultPayType, weeklyWorked, dailyworked, splitStart, dayStartTime.AddDays(1), seventhDay);
 
