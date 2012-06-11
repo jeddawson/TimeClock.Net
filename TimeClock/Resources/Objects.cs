@@ -115,8 +115,8 @@ namespace TimeClock.Resources
              OutText = Out.ToString(@"hh\:mm");
              EntryText = Entry.ToString(@"hh\:mm");
              RegularText = TimeSpan.FromMinutes(Regular).ToString(@"hh\:mm");
-             OvertimeText = Overtime.ToString();
-             DoubletimeText = Doubletime.ToString(@"hh\:mm");
+             OvertimeText = TimeSpan.FromMinutes(Overtime).ToString(@"hh\:mm");
+             DoubletimeText = TimeSpan.FromMinutes(Doubletime).ToString(@"hh\:mm");
          }
 
          public TimeCardView(int lineNumber, DateTime date, DateTime intime, DateTime outtime, double regular, double overtime, int punchID, PunchTypes punchType = PunchTypes.REGULAR)
@@ -156,17 +156,14 @@ namespace TimeClock.Resources
              generateText();
          }
 
+         public TimeCardView()
+         {
+         }
+
          public void updateEntry()
          {
              Entry = Out.Subtract(In);
          }
 
-
-
-         TimeCardView()
-         {
-
-             Entry = Out.Subtract(In);
-         }
      }
 }
