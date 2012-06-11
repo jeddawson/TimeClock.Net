@@ -1,0 +1,215 @@
+﻿@model IEnumerable<TimeClock.Resources.ClockInitialItem>
+
+@{
+    ViewBag.Title = "Main";
+}
+
+<div class="row">
+<div class="twelve columns">
+    <form class="custom" data-bind="with: initialData">
+    <fieldset>
+        <h4>Time Clock</h4>
+        <p>Select your name and enter your pin.</p>
+        <div class="row">
+            <label>Name</label>
+            <!-- Employee List -->    
+            <select data-bind="
+                options: $data,
+                value: $root.selectedEmployeeValue,
+                valueUpdate: 'change',
+                optionsText: 'employeeName', 
+                optionsValue: 'employeeID', 
+                optionsCaption: 'Choose...'">
+            </select>
+        </div>
+        <div class="row" data-bind="css: { error: $root.isError() == true }">
+            <label>Pin</label>
+            <input type="password" class="oversize input-text" id="pin" data-bind="value: $root.employeePin" />
+            <small class="error" data-bind="visible: $root.pinError().length > 0, value: $root.pinError"></small>
+        </div>
+        <div class="row" data-bind="with: $root.statusData">
+            <a href="#" class="large radius nice blue button" data-bind="click: $root.doPunch, text: punchDirection"></a>
+        </div>
+    </fieldset>
+    </form>
+    <!-- "logged in" view goes here -->
+    <!-- ko with: employeeData -->
+    <ul class="nav-bar">
+        <li>
+            <a href="#:timeCard" class="main" data-bind="click: $root.loadTimeCard">Time Card</a>
+        </li>
+        <li>
+            <a href="#:messages" class="main" data-bind="click: $root.loadMessages">Messages</a>
+        </li>
+        <li>
+            <a href="#:history" class="main" data-bind="click: $root.loadHistory">History</a>
+        </li>
+        <li>
+            <a href="#:logout" class="main" data-bind="click: $root.doLogOut">Log Out</a>
+        </li>
+    </ul>
+    <table data-bind="with: $root.timecardData">
+        <thead><tr><th>Date</th><th>In</th><th>Out</th><th>Entry</th><th>Regular</th><th>Overtime</th></tr></thead>
+        <tbody data-bind="foreach: lines">
+            <tr>
+                <td data-bind="text: DateText"></td>
+                <td data-bind="text: InText"></td>
+                <td data-bind="text: OutText"></td>
+                <td data-bind="text: EntryText"></td>
+                <td data-bind="text: RegularText"></td>
+                <td data-bind="text: OvertimeText"></td>
+            </tr>
+        </tbody>
+    </table>
+    <table data-bind="with: $root.messageData">
+        <thead><tr><th>Date</th><th>From</th><th>Subject</th></tr></thead>
+        <tbody data-bind="foreach: messages">
+            <tr data-bind="click: $root.goToMessage">
+                <td data-bind="text: Date"></td>
+                <td data-bind="text: From"></td>
+                <td data-bind="text: Subject"></td>
+            </tr>     
+        </tbody>
+    </table>
+    <div class="viewMail" data-bind="with: chosenMessageData">
+        <div class="messageInfo">
+            <h1 data-bind="text: Subject"></h1>
+            <p><label>From</label>: <span data-bind="text: From"></span></p>
+            <p><label>To</label>: <span data-bind="text: To"></span></p>
+            <p><label>Date</label>: <span data-bind="text: Date"></span></p>
+        </div>
+        <p class="message" data-bind="html: messageContent" />
+    </div>
+    <table data-bind="with: $root.historyData">
+        <thead><tr><th>Pay Period</th><th>First Day</th><th>Last Day</th></tr></thead>
+        <tbody data-bind="foreach: payPeriods">
+            <tr data-bind="click: $root.goToTimeCard">
+                <td data-bind="text: LineNumber"></td>
+                <td data-bind="text: Start"></td>
+                <td data-bind="text: End"></td>
+            </tr>     
+        </tbody>
+    </table>
+    <!-- /ko --> 
+</div>
+</div>
+
+<script lang="text/javascript">
+
+    // Constructor for status object
+    var status = function (data) {
+        var me = this;
+        if(data.openPunch > 0 ) {
+            me.punchDirection   = ko.observable("Punch Out");
+            me.openPunch        = ko.observable(data.openPunch);
+        } else {
+            me.punchDirection   = ko.observable("Punch In");
+            me.openPunch        = ko.observable(undefined);
+        }
+    };
+
+    //The Knockout.js Model
+    var TimecardViewModel = function() {
+        var self = this;
+        //Data
+        self.initialData    =   ko.observableArray(@Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.EmpList)));
+        self.statusData     =   ko.observable();
+        self.employeeData   =   ko.observable();
+        self.timecardData   =   ko.observable();
+        self.messageData    =   ko.observable();
+        self.chosenMessageData = ko.observable();
+        self.historyData    =   ko.observable();
+        self.settingData    =   ko.observable();
+
+        //Initial Data Properties
+        self.selectedEmployeeValue  =   ko.observableArray([]);
+        self.employeePin            =   ko.observable("");
+        self.isError                =   ko.observable(false);
+        self.pin                    =   ko.observable("");
+        self.pinError               =   ko.observable("");
+        self.generalError           =   ko.observable("");
+
+        //Methods
+
+        self.employeePin.subscribe = function() {
+            if(self.employeePin().length >= 4) {
+                //Nothing for now, eventually want to validate it on the fly!
+            }
+            return true;
+        };
+
+        self.processPunch = function(data) {
+            if(data.isSuccess) {
+                self.initialData = [];
+                self.timecardData = ko.observable(data.timecardData);
+            } else {
+                //Handle error
+                self.isError(true);
+                self.pinError(data.pinError);
+                self.generalError(data.generalError);
+                self.timecardData(null);
+            }
+        };
+
+        //Does the post back to the server with the employee's ID and pin.
+        self.doPunch = function() {
+            //$.post('/REST/clock/punch', ko.toJSON({ ID: self.selectedEmployeeValue(), pin: self.employeePin, closesPunch: self.statusData().openPunch }) , self.timecardData);
+            var tempInit = self.initialData();
+            self.initialData(null);
+            self.employeeData("test");
+            $.ajax("/REST/clock/punch", {
+                data:        ko.toJSON({ ID: self.selectedEmployeeValue(), pin: self.employeePin, closesPunch: self.statusData().openPunch }),
+                type:        "post", 
+                contentType: "application/json",
+                success:     self.timecardData ,
+                failure:     function(exception) {
+                    self.initialData(tempInit);
+                    self.employeeData(null);
+                }
+            });
+        };
+        
+
+        self.loadTimeCard = function() {
+
+        };
+
+        self.loadMessages = function() {
+
+        };
+
+        self.loadHistory = function() {
+
+        };
+
+        self.doLogOut = function () {
+            window.location.reload();
+        };
+
+        //When the internal value of selected employee changes, check the employee's status
+        self.selectedEmployeeValue.subscribe(function() {
+            if(self.selectedEmployeeValue() != undefined) {
+                $.get("/REST/clock/status/" + self.selectedEmployeeValue(), {}, self.statusData );
+            }
+        });
+
+        //Update the UI with new status information
+        self.updateStatus = function(result) {
+            self.punchDirection( result.openPunch > 0 ? "Punch Out" : "Punch In" );
+            self.openPunch( result.openPunch );
+            self.lines( result.TimeCard.length ? result.TimeCard : "" );
+        };
+
+        self.reset = function() {
+            self.timecardData(undefined);
+            self.messageData(undefined);
+            self.historyData(undefined);
+            self.settingData(undefined);
+            $.get("/REST/clock/list", {}, self.initialData);
+        }
+
+    }
+
+    $(document).ready(function() { ko.applyBindings( new TimecardViewModel()); });
+
+</script>

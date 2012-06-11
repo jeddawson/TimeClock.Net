@@ -206,12 +206,15 @@ namespace TimeClock.Controllers
                         currentPunch.OutTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 0);
 
                         if (currentPunch.OutTime.Value.Subtract(currentPunch.InTime).TotalMinutes < 1)
+                        {
                             db.Punches.Remove(currentPunch);
+                        }
+                        else
+                        {
+                            Calculations.addLines(db, currentPunch);
+                        }
 
                         db.SaveChanges();
-
-
-                        Calculations.addLines(db, currentPunch);
 
                         var timeCardData = db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart).ToList();
 

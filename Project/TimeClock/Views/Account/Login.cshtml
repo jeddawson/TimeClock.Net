@@ -1,0 +1,33 @@
+@model TimeClock.Models.LoginModel
+
+@{
+    ViewBag.Title = "Log in";
+}
+
+<div class="row">
+    <h3>@ViewBag.Title.</h3>
+    <p>Enter your user name and password below.</p>
+</div>
+
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+<div class="row">
+
+    @using (Html.BeginForm((string)ViewBag.FormAction, "Account")) {
+        @Html.ValidationSummary(true, "Log in was unsuccessful. Please correct the errors and try again.")
+            <div class="row">
+                @Html.LabelFor(m => m.UserName)
+                @Html.TextBoxFor(m => m.UserName, new { @class = "input-text" })
+                @Html.ValidationMessageFor(m => m.UserName)
+            </div>
+            <div class="row">
+                @Html.LabelFor(m => m.Password)
+                @Html.PasswordFor(m => m.Password,  new { @class = "input-text" })
+                @Html.ValidationMessageFor(m => m.Password)
+           </div>
+           <div class="row">
+                <input type="submit" value="Log in" class="blue nice button radius" />
+           </div>
+    }
+</div>

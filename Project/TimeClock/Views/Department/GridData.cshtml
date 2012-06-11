@@ -1,0 +1,22 @@
+﻿@model IEnumerable<TimeClock.Models.Department>
+
+@foreach (var item in Model) {
+    <tr data-pkey="@item.DepartmentID">
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Location)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PayPeriodSeed)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PayPeriodInterval)
+        </td>
+        <td class="rowControl hidden">
+            <a href="#makeRowEditable" class="makeRowEditable">Edit</a> |
+            <a href="#deleteRow" class="deleteRow">Delete</a>
+        </td>
+    </tr>
+}

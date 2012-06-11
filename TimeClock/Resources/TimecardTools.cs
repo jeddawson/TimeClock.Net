@@ -68,15 +68,6 @@ namespace TimeClock.Resources
         public string HMAC { get; set; }
     }
 
-    public class MessageData
-    {
-        public int      ID              { get; set; }
-        public string   from            { get; set; }
-        public string   subject         { get; set; }
-        public string   body            { get; set; }
-        public bool     isNew           { get; set; }
-    }
-
     public class Calculations
     {
         public static bool addLines(TimeClockContext db, Punch punch) 

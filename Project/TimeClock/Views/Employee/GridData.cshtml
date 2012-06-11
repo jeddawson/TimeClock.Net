@@ -1,0 +1,34 @@
+﻿@model IEnumerable<TimeClock.Models.Employee>
+
+@foreach (var item in Model) {
+    <tr data-pkey="@item.EmployeeID">
+        <td>
+             @Html.DisplayFor(modelItem => item.EmployeeID)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.FirstName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.MiddleInitial)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.LastName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Terminated)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Pin)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DepartmentID)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ManagerID)
+        </td>
+        <td class="rowControl hidden">
+            <a href="#makeRowEditable" class="makeRowEditable">Edit</a> |
+            <a href="#deleteRow" class="deleteRow">Delete</a>
+        </td>
+    </tr>
+}

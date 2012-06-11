@@ -1,0 +1,29 @@
+﻿@model TimeClock.Models.Department
+
+<tr @if (Model != null) {
+    @:data-pkey="@Model.DepartmentID"
+}>
+    <td>
+        @Html.EditorFor(model => model.Name)
+        @Html.ValidationMessageFor(model => model.Name)
+    </td>
+    <td>
+        @Html.EditorFor(model => model.Location)
+        @Html.ValidationMessageFor(model => model.Location)
+    </td>
+    <td>
+        @Html.EditorFor(model => model.PayPeriodSeed)
+        @Html.ValidationMessageFor(model => model.PayPeriodSeed)
+    </td>
+    <td>
+        @Html.EditorFor(model => model.PayPeriodInterval)
+        @Html.ValidationMessageFor(model => model.PayPeriodInterval)
+    </td>
+    <td>
+@if (ViewContext.RouteData.Values["Action"].ToString() == "Edit") {
+        <button class="editRow">Save</button><button class="cancelEditRow">Cancel</button>
+} else {
+        <button class="createRow">Create</button><button class="cancelCreateRow">Cancel</button>
+}
+    </td>
+</tr>
