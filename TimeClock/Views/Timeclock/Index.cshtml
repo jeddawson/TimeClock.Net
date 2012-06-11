@@ -175,7 +175,8 @@
         };
 
         self.loadMessages = function() {
-
+            self.employeeData(null);
+            $.get("/REST/clock/GetMessages/" + self.selectedEmployeeValue(), {} , self.messageData);
         };
 
         self.loadHistory = function() {

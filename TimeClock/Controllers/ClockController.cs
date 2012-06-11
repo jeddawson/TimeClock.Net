@@ -184,7 +184,7 @@ namespace TimeClock.Controllers
                         db.Punches.Add(temp);
                         db.SaveChanges();
 
-                        var timeCardData = new List<TimeCardView>();
+                        var timeCardData = TimeCardView.LinesToTimeCardView(db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart).AsEnumerable()).ToList();
                         timeCardData.Add(new TimeCardView()
                         {
                             DateText = DateTime.Now.ToString(@"MM\/dd\/yy"),
