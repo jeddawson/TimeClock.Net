@@ -114,10 +114,19 @@ namespace TimeClock.Resources
              InText = In.ToString(@"hh\:mm");
              OutText = Out.ToString(@"hh\:mm");
              EntryText = Entry.ToString(@"hh\:mm");
-             RegularText = TimeSpan.FromMinutes(Math.Round(Regular, 2)).ToString(@"hh\:mm");
-             OvertimeText = TimeSpan.FromMinutes(Math.Round(Overtime, 2)).ToString(@"hh\:mm");
-             DoubletimeText = TimeSpan.FromMinutes(Math.Round(Doubletime, 2)).ToString(@"hh\:mm");
+             RegularText = parseDoubleToHoursMinutes(Regular);//TimeSpan.FromMinutes(Math.Round(Regular, 2)).ToString(@"hh\:mm");
+             OvertimeText = parseDoubleToHoursMinutes(Overtime);//TimeSpan.FromMinutes(Math.Round(Overtime, 2)).ToString(@"hh\:mm");
+             DoubletimeText = parseDoubleToHoursMinutes(Doubletime);//TimeSpan.FromMinutes(Math.Round(Doubletime, 2)).ToString(@"hh\:mm");
          }
+
+         private String parseDoubleToHoursMinutes(double time)
+         {
+             String hours = ((int) time / 60).ToString();
+             String minutes = Math.Round(time % 60, 0).ToString();
+
+             return hours + ":" + minutes;
+         }
+
 
          public TimeCardView(int lineNumber, DateTime date, DateTime intime, DateTime outtime, double regular, double overtime, int punchID, PunchTypes punchType = PunchTypes.REGULAR)
          {
