@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Web;
 using TimeClock.Models;
@@ -9,10 +10,10 @@ namespace TimeClock.Resources
 {
     public class PayPeriodTools
     {
-        public HttpResponseMessage getAllPayroll(TimeClockContext db, PayPeriod payp)
+        public String getAllPayroll(TimeClockContext db, PayPeriod payp)
         {
             var employees = db.Employees;
-
+            String retString = "";
             foreach (Employee emp in employees)
             {
                 Timecard tc = db.Timecards.SingleOrDefault(time => time.PayPeriod.Equals(payp.Start) && time.EmployeeID.Equals(emp.EmployeeID));
@@ -34,10 +35,11 @@ namespace TimeClock.Resources
                 foreach (String key in lineInformation.Keys)
                 {
                     String payRollLine = emp.EmployeeID + ", " + key + ", " + lineInformation[key].ToString("F2");
+                    retString += payRollLine + "\n";
                 }
             }
 
-
+            return retString;
         }
 
 

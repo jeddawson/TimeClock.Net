@@ -27,7 +27,7 @@ namespace TimeClock.Resources
           public DateTime Date { get; set; }
           public DateTime In { get; set; }
           public DateTime Out { get; set; }
-          public TimeSpan Entry { get; set; }
+          public string Entry { get; set; }
           public double Regular { get; set; }
           public double Overtime { get; set; }
          public enum PunchTypes {REGULAR, HOLIDAY, SICK, VACATION}
@@ -79,7 +79,7 @@ namespace TimeClock.Resources
                      Date = line.SplitStart.Date,
                      In = line.SplitStart,
                      Out = line.SplitEnd,
-                     Entry = line.SplitEnd.Subtract(line.SplitStart),
+                     Entry = line.SplitEnd.Subtract(line.SplitStart).ToString(@"hh\:mm"),
                      Regular = regular,
                      Overtime = overtime,
                      PunchType = pType,
@@ -99,7 +99,7 @@ namespace TimeClock.Resources
             In = intime;
             Out = outtime;
 
-            Entry = Out.Subtract(In);
+            Entry = Out.Subtract(In).ToString(@"hh\:mm");
 
             Regular = regular;
             Overtime = overtime;
@@ -119,7 +119,7 @@ namespace TimeClock.Resources
              Regular = 0;
              Overtime = 0;
 
-             Entry = Out.Subtract(In);
+             Entry = Out.Subtract(In).ToString(@"hh\:mm");
 
              PunchType = punchType;
              PunchID = punchID;
@@ -127,15 +127,15 @@ namespace TimeClock.Resources
 
          public void updateEntry() 
          {
-            Entry = Out.Subtract(In);
+             Entry = Out.Subtract(In).ToString(@"hh\:mm");
          }
 
 
 
           TimeCardView()
           {
-                
-               Entry = Out.Subtract(In);
+
+              Entry = Out.Subtract(In).ToString(@"hh\:mm");
           }
      }
 }

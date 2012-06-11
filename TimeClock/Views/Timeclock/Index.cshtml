@@ -32,11 +32,20 @@
         </div>
     </fieldset>
     </form>
-    <!-- ko with: timecardData -->
     <!-- "logged in" view goes here -->
-
-
-    <!-- /ko -->
+    <table data-bind="with: timecardData">
+        <thead><tr><th>Date</th><th>In</th><th>Out</th><th>Entry</th><th>Regular</th><th>Overtime</th></tr></thead>
+        <tbody data-bind="foreach: $root.timecardData">
+            <tr>
+                <td data-bind="text: Date"></td>
+                <td data-bind="text: In"></td>
+                <td data-bind="text: Out"></td>
+                <td data-bind="text: Entry"></td>
+                <td data-bind="text: Regular"></td>
+                <td data-bind="text: Overtime"></td>
+            </tr>
+        </tbody>
+    </table> 
 </div>
 </div>
 
@@ -85,7 +94,7 @@
         self.processPunch = function(data) {
             if(data.isSuccess) {
                 self.statusData(undefined);
-                self.timecardData = data.timecardData;
+                self.timecardData = ko.observable(data.timecardData);
             } else {
                 //Handle error
                 self.isError(true);
@@ -100,8 +109,8 @@
             $.ajax("/REST/clock/punch", {
                 data:       ko.toJSON({ ID: self.selectedEmployeeValue(), pin: self.employeePin, closesPunch: self.statusData().openPunch }),
                 type:       "post",             contentType: "application/json",
-                success:    function(result)    { self.processPunch(result); },
-                failure:    function(exception) { alert(exception);  }
+                success:    function(result)    { self.processPunch(result) },
+                failure:    function(exception) { alert(exception)  }
             });
         };
         
