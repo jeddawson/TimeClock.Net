@@ -35,14 +35,14 @@
     <!-- "logged in" view goes here -->
     <table data-bind="with: timecardData">
         <thead><tr><th>Date</th><th>In</th><th>Out</th><th>Entry</th><th>Regular</th><th>Overtime</th></tr></thead>
-        <tbody data-bind="foreach: $root.timecardData">
+        <tbody data-bind="foreach: lines">
             <tr>
-                <td data-bind="text: Date"></td>
-                <td data-bind="text: In"></td>
-                <td data-bind="text: Out"></td>
-                <td data-bind="text: Entry"></td>
-                <td data-bind="text: Regular"></td>
-                <td data-bind="text: Overtime"></td>
+                <td data-bind="text: DateText"></td>
+                <td data-bind="text: InText"></td>
+                <td data-bind="text: OutText"></td>
+                <td data-bind="text: EntryText"></td>
+                <td data-bind="text: RegularText"></td>
+                <td data-bind="text: OvertimeText"></td>
             </tr>
         </tbody>
     </table> 
@@ -93,14 +93,14 @@
 
         self.processPunch = function(data) {
             if(data.isSuccess) {
-                self.statusData(undefined);
+                self.initialData(null);
                 self.timecardData = ko.observable(data.timecardData);
             } else {
                 //Handle error
                 self.isError(true);
                 self.pinError(data.pinError);
                 self.generalError(data.generalError);
-                self.timecardData(undefined);
+                self.timecardData(null);
             }
         };
 

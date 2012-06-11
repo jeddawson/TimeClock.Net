@@ -149,7 +149,7 @@ namespace TimeClock.Controllers
                     {
                         isSuccess = false,
                         pinError = "Pin and user did not match.",
-                        timecardData = null,
+                        lines = null,
                         generalError = null
                     };
 
@@ -196,7 +196,7 @@ namespace TimeClock.Controllers
                 {
                     isSuccess = true,
                     pinError = "",
-                    timecardData = TimeCardView.LinesToTimeCardView(timeCardData),
+                    lines = TimeCardView.LinesToTimeCardView(timeCardData),
                     generalError = null
                 };
                  
