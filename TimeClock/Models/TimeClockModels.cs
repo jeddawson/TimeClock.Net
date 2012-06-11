@@ -339,6 +339,8 @@ namespace TimeClock.Models
     {
         public int MessageID { get; set; }
         public string Body { get; set; }
+        public DateTime DateCreated { get; set; }
+        public String Subject { get; set; }
         
         /* One to One */
         public string ManagerID { get; set; }
@@ -470,6 +472,8 @@ namespace TimeClock.Models
         /* One to Many */
         [ForeignKey("TimecardID")]
         public virtual ICollection<Line> Lines { get; set; }
+        [ForeignKey("EmployeeID")]
+        public virtual Employee Employee { get; set; }
 
         public DateTime getStartingDay(TimeClockContext db)
         {

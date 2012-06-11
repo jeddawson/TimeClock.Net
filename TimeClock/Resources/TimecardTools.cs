@@ -63,6 +63,7 @@ namespace TimeClock.Resources
     {
         public int messageID { get; set; }
         public string employeeID { get; set; }
+        public DateTime time { get; set; }
         public string timestamp { get; set; }
         public string HMAC { get; set; }
     }
