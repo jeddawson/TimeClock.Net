@@ -93,7 +93,7 @@
 
         self.processPunch = function(data) {
             if(data.isSuccess) {
-                self.initialData(null);
+                self.initialData = [];
                 self.timecardData = ko.observable(data.timecardData);
             } else {
                 //Handle error
@@ -109,7 +109,7 @@
             $.ajax("/REST/clock/punch", {
                 data:       ko.toJSON({ ID: self.selectedEmployeeValue(), pin: self.employeePin, closesPunch: self.statusData().openPunch }),
                 type:       "post",             contentType: "application/json",
-                success:    function(result)    { self.processPunch(result) },
+                success:    function(result)    { self.timecardData },
                 failure:    function(exception) { alert(exception)  }
             });
         };
