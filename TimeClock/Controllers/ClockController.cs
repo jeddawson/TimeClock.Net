@@ -178,7 +178,12 @@ namespace TimeClock.Controllers
                         // Set the ending time of the punch
                         Punch currentPunch = db.Punches.First(p => p.PunchID == request.closesPunch);
                         currentPunch.OutTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 0);
+
+                        if (currentPunch.OutTime.Value.Subtract(currentPunch.InTime).TotalMinutes < 1)
+                            db.Punches.Remove(currentPunch);
+
                         db.SaveChanges();
+
 
                         Calculations.addLines(db, currentPunch);
                                   

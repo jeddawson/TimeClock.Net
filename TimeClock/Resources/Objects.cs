@@ -113,7 +113,7 @@ namespace TimeClock.Resources
              DateText = Date.ToString(@"MM\/dd\/yy");
              InText = In.ToString(@"hh\:mm");
              OutText = Out.ToString(@"hh\:mm");
-             EntryText = Entry.ToString(@"hh\:mm");
+             EntryText = parseDoubleToHoursMinutes(Entry.TotalMinutes);//Entry.ToString(@"hh\:mm");
              RegularText = parseDoubleToHoursMinutes(Regular);//TimeSpan.FromMinutes(Math.Round(Regular, 2)).ToString(@"hh\:mm");
              OvertimeText = parseDoubleToHoursMinutes(Overtime);//TimeSpan.FromMinutes(Math.Round(Overtime, 2)).ToString(@"hh\:mm");
              DoubletimeText = parseDoubleToHoursMinutes(Doubletime);//TimeSpan.FromMinutes(Math.Round(Doubletime, 2)).ToString(@"hh\:mm");
