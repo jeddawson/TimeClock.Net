@@ -106,10 +106,11 @@
 
         //Does the post back to the server with the employee's ID and pin.
         self.doPunch = function() {
+            //$.post('/REST/clock/punch', ko.toJSON({ ID: self.selectedEmployeeValue(), pin: self.employeePin, closesPunch: self.statusData().openPunch }) , self.timecardData);
             $.ajax("/REST/clock/punch", {
                 data:       ko.toJSON({ ID: self.selectedEmployeeValue(), pin: self.employeePin, closesPunch: self.statusData().openPunch }),
                 type:       "post",             contentType: "application/json",
-                success:    function(result)    { self.timecardData },
+                success:  self.timecardData ,
                 failure:    function(exception) { alert(exception)  }
             });
         };
