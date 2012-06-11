@@ -23,15 +23,23 @@ namespace TimeClock.Resources
 
      public class TimeCardView
      {
-          public int lineNum { get; set; }
-          public DateTime Date { get; set; }
-          public DateTime In { get; set; }
-          public DateTime Out { get; set; }
-          public string Entry { get; set; }
-          public double Regular { get; set; }
-          public double Overtime { get; set; }
-         public enum PunchTypes {REGULAR, HOLIDAY, SICK, VACATION}
-         public PunchTypes PunchType {get; set; }
+         public int lineNum { get; set; }
+         public DateTime Date { get; set; }
+         public String DateText { get; set; }
+         public DateTime In { get; set; }
+         public String InText { get; set; }
+         public DateTime Out { get; set; }
+         public String OutText { get; set; }
+         public TimeSpan Entry { get; set; }
+         public String EntryText { get; set; }
+         public double Regular { get; set; }
+         public String RegularText { get; set; }
+         public double Overtime { get; set; }
+         public String OvertimeText { get; set; }
+         public double Doubletime { get; set; }
+         public String DoubletimeText { get; set; }
+         public enum PunchTypes { REGULAR, HOLIDAY, SICK, VACATION }
+         public PunchTypes PunchType { get; set; }
          public int PunchID { get; set; }
 
          public static IEnumerable<TimeCardView> LinesToTimeCardView(IEnumerable<Line> tcLines)
@@ -44,6 +52,10 @@ namespace TimeClock.Resources
              PunchTypes pType = new PunchTypes();
              foreach (Line line in tcLines)
              {
+                 regular = 0;
+                 overtime = 0;
+                 doubletime = 0;
+
                  switch (line.PayType.Description)
                  {
                      case "Regular":
@@ -72,19 +84,23 @@ namespace TimeClock.Resources
                          pType = PunchTypes.HOLIDAY;
                          break;
                  }
-                 
+
                  var single = new TimeCardView()
                  {
                      lineNum = i,
                      Date = line.SplitStart.Date,
                      In = line.SplitStart,
                      Out = line.SplitEnd,
-                     Entry = line.SplitEnd.Subtract(line.SplitStart).ToString(@"hh\:mm"),
+                     Entry = line.SplitEnd.Subtract(line.SplitStart),
                      Regular = regular,
                      Overtime = overtime,
+                     Doubletime = doubletime,
                      PunchType = pType,
-                     PunchID = line.PunchID
+                     PunchID = line.PunchID,
+
                  };
+
+                 single.generateText();
 
                  view.Add(single);
              }
@@ -92,22 +108,35 @@ namespace TimeClock.Resources
              return view.AsEnumerable();
          }
 
-         public TimeCardView(int lineNumber, DateTime date, DateTime intime, DateTime outtime, double regular, double overtime, int punchID, PunchTypes punchType = PunchTypes.REGULAR) 
-          {
-            lineNum = lineNumber;
-            Date = date;
-            In = intime;
-            Out = outtime;
+         private void generateText()
+         {
+             DateText = Date.ToString(@"MM\/dd\/yy");
+             InText = In.ToString(@"hh\:mm");
+             OutText = Out.ToString(@"hh\:mm");
+             EntryText = Entry.ToString(@"hh\:mm");
+             RegularText = Regular.ToString(@"hh\:mm");
+             OvertimeText = Overtime.ToString(@"hh\:mm");
+             DoubletimeText = Doubletime.ToString(@"hh\:mm");
+         }
 
-            Entry = Out.Subtract(In).ToString(@"hh\:mm");
+         public TimeCardView(int lineNumber, DateTime date, DateTime intime, DateTime outtime, double regular, double overtime, int punchID, PunchTypes punchType = PunchTypes.REGULAR)
+         {
+             lineNum = lineNumber;
+             Date = date;
+             In = intime;
+             Out = outtime;
 
-            Regular = regular;
-            Overtime = overtime;
+             Entry = Out.Subtract(In);
 
-            PunchID = punchID;
-            PunchType = punchType;
+             Regular = regular;
+             Overtime = overtime;
 
-          }
+             PunchID = punchID;
+             PunchType = punchType;
+
+             generateText();
+
+         }
 
          public TimeCardView(int lineNumber, DateTime date, DateTime intime, DateTime outtime, int punchID, PunchTypes punchType = PunchTypes.REGULAR)
          {
@@ -119,23 +148,25 @@ namespace TimeClock.Resources
              Regular = 0;
              Overtime = 0;
 
-             Entry = Out.Subtract(In).ToString(@"hh\:mm");
+             Entry = Out.Subtract(In);
 
              PunchType = punchType;
              PunchID = punchID;
+
+             generateText();
          }
 
-         public void updateEntry() 
+         public void updateEntry()
          {
-             Entry = Out.Subtract(In).ToString(@"hh\:mm");
+             Entry = Out.Subtract(In);
          }
 
 
 
-          TimeCardView()
-          {
+         TimeCardView()
+         {
 
-              Entry = Out.Subtract(In).ToString(@"hh\:mm");
-          }
+             Entry = Out.Subtract(In);
+         }
      }
 }
