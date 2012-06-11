@@ -258,5 +258,41 @@ namespace TimeClock.Controllers
                 return new HttpResponseMessage(HttpStatusCode.Created);
             }
         }
+
+
+        //pull list of messages needs a response type
+
+        public HttpResponseMessage GetMessages(string id)
+        {
+            
+    /* new two new types messageData and messageList
+     * messageData() { messages = List<messageList>() { messageId , Date, From, Subject } }
+     */
+
+        }
+
+        //pull message details
+
+        public HttpResponseMessage GetMessageDetails(int id)
+        {
+            /* 
+             * messageDetails() { subject, from, to, date, message }
+             */
+        }
+
+        //Get a list of time cards for an employee
+        public HttpResponseMessage GetTimeCardHistory(string id)
+        {
+            /*
+             *  { LineNumber, StartDate, EndDate }
+             */
+        }
+
+        //Should return identical to time card lines
+        public HttpResponseMessage<IEnumerable<TimeCardView>> GetTimeCardDetails(string id, int id)
+        {
+            //List<TimeCardView>() {}
+        }
+
     }
 }
