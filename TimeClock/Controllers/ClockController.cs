@@ -138,12 +138,9 @@ namespace TimeClock.Controllers
         {
             using (var db = new TimeClockContext())
             {
-                /******************************************************************************    TODO ITEM    *********************************/
-                //This is where we need to insert the new punch for the employee
-                //If it is an out punch, we should recalculate their timecard lines. 
                 Employee emp = db.Employees.FirstOrDefault(e => e.EmployeeID.Equals(request.ID));
 
-                if (!emp.Pin.Equals(request.pin))
+                if (!emp.Pin.Equals(request.pin)) // the pin didn't match don't do anything
                 {
                     PunchResponse response = new PunchResponse()
                     {
@@ -154,7 +151,6 @@ namespace TimeClock.Controllers
                     };
 
                     return new HttpResponseMessage<PunchResponse>(response);
-
                 }
                 else
                 {
@@ -168,7 +164,6 @@ namespace TimeClock.Controllers
                         generalError = null
                     };
 
-
                     if (request.closesPunch == -1)  // Create a new punch in the DB
                     {
                         Punch temp = new Punch()
@@ -178,14 +173,14 @@ namespace TimeClock.Controllers
                             OutTime = null,
                             DepartmentID = emp.DepartmentID,
                             PunchTypeID = Constants.DEFAULT_PUNCH_TYPE // Make this equal to the Regular punch type.
-                            //OutTime = null;
                         };
 
                         db.Punches.Add(temp);
                         db.SaveChanges();
 
-                        var timeCardData = TimeCardView.LinesToTimeCardView(db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart).AsEnumerable()).ToList();
-                        timeCardData.Add(new TimeCardView()
+                        var timeCardData = TimeCardView.LinesToTimeCardView(db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart));
+                        // We add the last line to just display the information, letting the user know that we register the punch in
+                        timeCardData.Add(new TimeCardView() 
                         {
                             DateText = DateTime.Now.ToString(@"MM\/dd\/yy"),
                             InText = temp.InTime.ToString(@"hh\:mm"),
@@ -196,8 +191,6 @@ namespace TimeClock.Controllers
                         });
 
                         retVal.lines = timeCardData;
-                        
-
                     }
                     else // We need to close the last punch and make lines -- Make it split the lines over the payperiod seed
                     {
@@ -205,32 +198,32 @@ namespace TimeClock.Controllers
                         Punch currentPunch = db.Punches.First(p => p.PunchID == request.closesPunch);
                         currentPunch.OutTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 0);
 
-                        if (currentPunch.OutTime.Value.Subtract(currentPunch.InTime).TotalMinutes < 1)
+                        var timeCardData = db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart).ToList();
+
+                        retVal.lines = TimeCardView.LinesToTimeCardView(timeCardData);
+                        
+                        if (currentPunch.OutTime.Value.Subtract(currentPunch.InTime).TotalMinutes < 1) // punch was shorter than a minut.
                         {
                             db.Punches.Remove(currentPunch);
+                            retVal.lines.Add(new TimeCardView() // Make the last line show, but mark is as rapid since it won't get put in the DB
+                            {
+                                DateText = currentPunch.InTime.ToString(@"MM\/dd\/yy"),
+                                InText = currentPunch.InTime.ToString(@"hh\:mm"),
+                                OutText = currentPunch.OutTime.Value.ToString(@"hh\:mm"),
+                                RegularText = "00:00",
+                                OvertimeText = "00:00",
+                                DoubletimeText = "00:00",
+                                isRapid = true
+                            });
                         }
-                        else
+                        else // Punch was longer than a minut, we add it to the DB.
                         {
                             Calculations.addLines(db, currentPunch);
                         }
 
                         db.SaveChanges();
-
-                        var timeCardData = db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart).ToList();
-
-                        retVal.lines = TimeCardView.LinesToTimeCardView(timeCardData);
-                        
                     }
 
-                    /*
-                    PunchResponse retVal = new PunchResponse()
-                    {
-                        isSuccess = true,
-                        pinError = "",
-                        lines = TimeCardView.LinesToTimeCardView(timeCardData),
-                        generalError = null
-                    };
-                    */
                     return new HttpResponseMessage<PunchResponse>(retVal);
                 }
 
@@ -255,8 +248,6 @@ namespace TimeClock.Controllers
         {
             using (var db = new TimeClockContext())
             {
-                /******************************************************************************    TODO ITEM    *********************************/
-                //Need to mark the corresponding message read.
                 MessageViewed temp = db.MessagesViewed.SingleOrDefault(mv => mv.EmployeeID.Equals(request.employeeID) && mv.MessageID.Equals(request.messageID));
 
                 temp.DateViewed = request.time;
@@ -269,6 +260,7 @@ namespace TimeClock.Controllers
         //pull list of messages needs a response type
 
         public HttpResponseMessage<MessagesResponse> GetMessages(string id)
+
         {
             using (var db = new TimeClockContext())
             {
@@ -299,18 +291,11 @@ namespace TimeClock.Controllers
 
                     returnMessages.Add(temp);
                 }
-
-
                 return new HttpResponseMessage<MessagesResponse>(new MessagesResponse() { messages = returnMessages });
             }
-            
-    /* new two new types messageData and messageList
-     * messageData() { messages = List<messageList>() { messageId , Date, From, Subject } }
-     */
-
         }
 
-        
+        // Get the details of a specific message for an employee.
         public HttpResponseMessage<MessageData> GetMessageDetails(int id, String empId)
         {
             using (var db = new TimeClockContext())
@@ -362,7 +347,6 @@ namespace TimeClock.Controllers
         //Should return identical to time card lines
         public HttpResponseMessage<PunchResponse> GetTimeCardDetails(string empId, int tcId = -1)
         {
-            //List<TimeCardView>() {}
             using (var db = new TimeClockContext())
             {
                 if (tcId == -1)
