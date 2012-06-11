@@ -98,7 +98,7 @@ namespace TimeClock.Resources
                      Doubletime = doubletime,
                      PunchType = pType,
                      PunchID = line.PunchID,
-                     isRapid = false;
+                     isRapid = false
                  };
 
                  single.generateText();
