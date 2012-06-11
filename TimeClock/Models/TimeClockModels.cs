@@ -200,14 +200,21 @@ namespace TimeClock.Models
         {
             var lines = db.Lines.Where(l => l.TimecardID == tc.TimecardID);
 
-            var punches = db.Punches.Where(p => lines.Any(l => l.PunchID == p.PunchID));
+            var punches = db.Punches.Where(p => lines.Any(l => l.PunchID == p.PunchID)).ToList();
 
-            lines = db.Lines.Where(l => punches.Any(p => p.PunchID == l.PunchID));
-
-            foreach (Line line in lines)
-                db.Lines.Remove(line);
-
-            db.SaveChanges();
+            var lineIDs = from l in db.Lines
+                    where punches.Contains(l.Punch)
+                    select l.LineID;
+            List<int> lineList = lineIDs.ToList<int>();
+            if (lineList != null)
+            {
+                //List<int> lineIDs = lines.Select(l => l.LineID).ToList<int>();
+                foreach (int lineID in lineList) {
+                    var line = db.Lines.SingleOrDefault(l => l.LineID == lineID);
+                    db.Lines.Remove(line);
+                }
+                db.SaveChanges();
+            }
 
             foreach (Punch punch in punches)
                 Calculations.addLines(db, punch);
