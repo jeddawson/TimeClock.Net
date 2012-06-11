@@ -57,6 +57,32 @@ namespace TimeClock.Controllers
             }
         }
 
+        /**
+         * Test function
+        **/
+
+        public HttpResponseMessage RebuildLines(string employeeId, string timecardDate = null)
+        {
+            using (var db = new TimeClockContext())
+            {
+                var employee = db.Employees.SingleOrDefault(e => e.EmployeeID == employeeId);
+                
+                if (employee == null)
+                    throw new HttpResponseException(HttpStatusCode.BadRequest);
+
+                PayPeriod payperiod = PayPeriodTools.LookupPayPeriod(db, employee.DepartmentID);
+
+                if (timecardDate != null)
+                    payperiod = PayPeriodTools.LookupPayPeriod(db, employee.DepartmentID, DateTime.Parse(timecardDate));
+
+                var timecard = employee.Timecards.SingleOrDefault(tc => tc.PayPeriod == payperiod.Start);
+
+                employee.rebuildTimecardLines(db, timecard);
+
+                return new HttpResponseMessage(HttpStatusCode.OK);
+            }
+        }
+
         // [GET] /REST/status/10-Jed
 
         /** 

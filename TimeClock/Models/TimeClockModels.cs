@@ -98,14 +98,14 @@ namespace TimeClock.Models
         public double minutsWorkedDate(TimeClockContext db, Timecard tc, DateTime date)
         {
             //Get all lines for this timecard
-            var lines = db.Lines.Where(l => l.TimecardID == tc.TimecardID).ToList();
+            var allLines = db.Lines.Where(l => l.TimecardID == tc.TimecardID).ToList();
 
             //Need to remove the lines that don't match our logic, LINQ wasn't a fan of this so just pull them out one at a time.
-
-            foreach (Line line in lines)
+            List<Line> lines = new List<Line>();
+            foreach (Line line in allLines)
             {
-                if (!(line.SplitStart.Subtract(date).TotalMinutes >= 0 && line.SplitEnd.Subtract(date.AddDays(1)).TotalMinutes <= 0))
-                    lines.Remove(line);
+                if (line.SplitStart.Subtract(date).TotalMinutes >= 0 && line.SplitEnd.Subtract(date.AddDays(1)).TotalMinutes <= 0)
+                    lines.Add(line);
             }
 
             double minutesWorked = 0;
