@@ -163,7 +163,7 @@ namespace TimeClock.Controllers
                         Punch temp = new Punch()
                         {
                             EmployeeID = emp.EmployeeID,
-                            InTime = DateTime.Now,
+                            InTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 0),
                             OutTime = null,
                             DepartmentID = emp.DepartmentID,
                             PunchTypeID = Constants.DEFAULT_PUNCH_TYPE // Make this equal to the Regular punch type.
@@ -177,7 +177,7 @@ namespace TimeClock.Controllers
                     {
                         // Set the ending time of the punch
                         Punch currentPunch = db.Punches.First(p => p.PunchID == request.closesPunch);
-                        currentPunch.OutTime = DateTime.Now;
+                        currentPunch.OutTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 0);
                         db.SaveChanges();
 
                         Calculations.addLines(db, currentPunch);
