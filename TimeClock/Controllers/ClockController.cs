@@ -13,7 +13,7 @@ namespace TimeClock.Controllers
 
     public class ClockController : ApiController
     {
-        
+        public TimeClockContext db = new TimeClockContext();
         /*
         private IEnumerable<PayType> PayTypes = new TimeClockContext().PayTypes.Where(pt => 
                pt.Description.Equals("Regular") || 
@@ -37,24 +37,22 @@ namespace TimeClock.Controllers
 
         public IEnumerable<ClockInitialItem> List()
         {
-            using (var db = new TimeClockContext())
+            List<ClockInitialItem> employeeList = new List<ClockInitialItem>();
+
+            var activeEmployees = db.Employees.Where(e => e.Terminated == false).OrderBy(e => e.DepartmentID);
+
+            foreach (Employee e in activeEmployees)
             {
-                List<ClockInitialItem> employeeList = new List<ClockInitialItem>();
-
-                var activeEmployees = db.Employees.Where(e => e.Terminated == false).OrderBy(e => e.DepartmentID);
-
-                foreach (Employee e in activeEmployees)
+                employeeList.Add(new ClockInitialItem()
                 {
-                    employeeList.Add(new ClockInitialItem()
-                    {
-                        employeeID      =   e.EmployeeID,
-                        employeeName    =   e.FirstName + " " + e.LastName,
-                        departmentID    =   e.DepartmentID
-                    });
-                }
-
-                return employeeList;
+                    employeeID      =   e.EmployeeID,
+                    employeeName    =   e.FirstName + " " + e.LastName,
+                    departmentID    =   e.DepartmentID
+                });
             }
+
+            return employeeList;
+           
         }
 
         /**
@@ -63,24 +61,23 @@ namespace TimeClock.Controllers
 
         public HttpResponseMessage RebuildLines(string employeeId, string timecardDate = null)
         {
-            using (var db = new TimeClockContext())
-            {
-                var employee = db.Employees.SingleOrDefault(e => e.EmployeeID == employeeId);
+            
+            var employee = db.Employees.SingleOrDefault(e => e.EmployeeID == employeeId);
                 
-                if (employee == null)
-                    throw new HttpResponseException(HttpStatusCode.BadRequest);
+            if (employee == null)
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
 
-                PayPeriod payperiod = PayPeriodTools.LookupPayPeriod(db, employee.DepartmentID);
+            PayPeriod payperiod = PayPeriodTools.LookupPayPeriod(db, employee.DepartmentID);
 
-                if (timecardDate != null)
-                    payperiod = PayPeriodTools.LookupPayPeriod(db, employee.DepartmentID, DateTime.Parse(timecardDate));
+            if (timecardDate != null)
+                payperiod = PayPeriodTools.LookupPayPeriod(db, employee.DepartmentID, DateTime.Parse(timecardDate));
 
-                var timecard = employee.Timecards.SingleOrDefault(tc => tc.PayPeriod == payperiod.Start);
+            var timecard = employee.Timecards.SingleOrDefault(tc => tc.PayPeriod == payperiod.Start);
 
-                employee.rebuildTimecardLines(db, timecard);
+            employee.rebuildTimecardLines(db, timecard);
 
-                return new HttpResponseMessage(HttpStatusCode.OK);
-            }
+            return new HttpResponseMessage(HttpStatusCode.OK);
+            
         }
 
         // [GET] /REST/status/10-Jed
@@ -96,26 +93,25 @@ namespace TimeClock.Controllers
 
         public EmployeeStatus Status(string id)
         {
-            using( var db = new TimeClockContext() ) {
+            
+            Employee employee = db.Employees.SingleOrDefault(e => e.EmployeeID == id);
 
-                Employee employee = db.Employees.SingleOrDefault(e => e.EmployeeID == id);
+            //PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, Constants.DEFAULT_DEPARTMENT);
 
-                //PayPeriod payPeriod = PayPeriodTools.LookupPayPeriod(db, Constants.DEFAULT_DEPARTMENT);
+            if (employee == null)
+                throw new HttpResponseException(HttpStatusCode.NoContent);
 
-                if (employee == null)
-                    throw new HttpResponseException(HttpStatusCode.NoContent);
+            var isWorking = employee.isWorking(db);
 
-                var isWorking = employee.isWorking(db);
-
-                EmployeeStatus status = new EmployeeStatus()
-                    {
-                        EmployeeID  = id,
-                        punchDirection = (isWorking >= 0 ? "Punch Out" : "Punch In"),
-                        openPunch   = isWorking,
-                    };
+            EmployeeStatus status = new EmployeeStatus()
+                {
+                    EmployeeID  = id,
+                    punchDirection = (isWorking >= 0 ? "Punch Out" : "Punch In"),
+                    openPunch   = isWorking,
+                };
                 
-                return status;
-            }
+            return status;
+          
         }
 
         // [POST] /REST/clock/punch
@@ -136,96 +132,95 @@ namespace TimeClock.Controllers
         [HttpPost]
         public HttpResponseMessage<PunchResponse> Punch(PunchRequest request)
         {
-            using (var db = new TimeClockContext())
+ 
+            Employee emp = db.Employees.FirstOrDefault(e => e.EmployeeID.Equals(request.ID));
+
+            if (!emp.Pin.Equals(request.pin)) // the pin didn't match don't do anything
             {
-                Employee emp = db.Employees.FirstOrDefault(e => e.EmployeeID.Equals(request.ID));
-
-                if (!emp.Pin.Equals(request.pin)) // the pin didn't match don't do anything
+                PunchResponse response = new PunchResponse()
                 {
-                    PunchResponse response = new PunchResponse()
+                    isSuccess = false,
+                    pinError = "Pin and user did not match.",
+                    lines = null,
+                    generalError = null
+                };
+
+                return new HttpResponseMessage<PunchResponse>(response);
+            }
+            else
+            {
+                var payPeriod = PayPeriodTools.LookupPayPeriod(db, emp.DepartmentID);
+                var curTimeCard = emp.Timecards.SingleOrDefault(tc => tc.PayPeriod == payPeriod.Start);
+
+                PunchResponse retVal = new PunchResponse()
+                {
+                    isSuccess = true,
+                    pinError = "",
+                    generalError = null
+                };
+
+                if (request.closesPunch == -1)  // Create a new punch in the DB
+                {
+                    Punch temp = new Punch()
                     {
-                        isSuccess = false,
-                        pinError = "Pin and user did not match.",
-                        lines = null,
-                        generalError = null
+                        EmployeeID = emp.EmployeeID,
+                        InTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 0),
+                        OutTime = null,
+                        DepartmentID = emp.DepartmentID,
+                        PunchTypeID = Constants.DEFAULT_PUNCH_TYPE // Make this equal to the Regular punch type.
                     };
 
-                    return new HttpResponseMessage<PunchResponse>(response);
+                    db.Punches.Add(temp);
+                    db.SaveChanges();
+
+                    var timeCardData = TimeCardView.LinesToTimeCardView(db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart));
+                    // We add the last line to just display the information, letting the user know that we register the punch in
+                    timeCardData.Add(new TimeCardView()
+                    {
+                        DateText = DateTime.Now.ToString(@"MM\/dd\/yy"),
+                        InText = temp.InTime.ToString(@"hh\:mm"),
+                        OutText = "",
+                        RegularText = "",
+                        OvertimeText = "",
+                        DoubletimeText = ""
+                    });
+
+                    retVal.lines = timeCardData;
                 }
-                else
+                else // We need to close the last punch and make lines -- Make it split the lines over the payperiod seed
                 {
-                    var payPeriod = PayPeriodTools.LookupPayPeriod(db, emp.DepartmentID);
-                    var curTimeCard = emp.Timecards.SingleOrDefault(tc => tc.PayPeriod == payPeriod.Start);
+                    // Set the ending time of the punch
+                    Punch currentPunch = db.Punches.First(p => p.PunchID == request.closesPunch);
+                    currentPunch.OutTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 0);
 
-                    PunchResponse retVal = new PunchResponse()
+                    var timeCardData = db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart).ToList();
+
+                    retVal.lines = TimeCardView.LinesToTimeCardView(timeCardData);
+
+                    if (currentPunch.OutTime.Value.Subtract(currentPunch.InTime).TotalMinutes < 1) // punch was shorter than a minut.
                     {
-                        isSuccess = true,
-                        pinError = "",
-                        generalError = null
-                    };
-
-                    if (request.closesPunch == -1)  // Create a new punch in the DB
-                    {
-                        Punch temp = new Punch()
+                        db.Punches.Remove(currentPunch);
+                        retVal.lines.Add(new TimeCardView() // Make the last line show, but mark is as rapid since it won't get put in the DB
                         {
-                            EmployeeID = emp.EmployeeID,
-                            InTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 0),
-                            OutTime = null,
-                            DepartmentID = emp.DepartmentID,
-                            PunchTypeID = Constants.DEFAULT_PUNCH_TYPE // Make this equal to the Regular punch type.
-                        };
-
-                        db.Punches.Add(temp);
-                        db.SaveChanges();
-
-                        var timeCardData = TimeCardView.LinesToTimeCardView(db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart));
-                        // We add the last line to just display the information, letting the user know that we register the punch in
-                        timeCardData.Add(new TimeCardView() 
-                        {
-                            DateText = DateTime.Now.ToString(@"MM\/dd\/yy"),
-                            InText = temp.InTime.ToString(@"hh\:mm"),
-                            OutText = "",
-                            RegularText = "",
-                            OvertimeText = "",
-                            DoubletimeText = ""
+                            DateText = currentPunch.InTime.ToString(@"MM\/dd\/yy"),
+                            InText = currentPunch.InTime.ToString(@"hh\:mm"),
+                            OutText = currentPunch.OutTime.Value.ToString(@"hh\:mm"),
+                            RegularText = "00:00",
+                            OvertimeText = "00:00",
+                            DoubletimeText = "00:00",
+                            isRapid = true
                         });
-
-                        retVal.lines = timeCardData;
                     }
-                    else // We need to close the last punch and make lines -- Make it split the lines over the payperiod seed
+                    else // Punch was longer than a minut, we add it to the DB.
                     {
-                        // Set the ending time of the punch
-                        Punch currentPunch = db.Punches.First(p => p.PunchID == request.closesPunch);
-                        currentPunch.OutTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 0);
-
-                        var timeCardData = db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart).ToList();
-
-                        retVal.lines = TimeCardView.LinesToTimeCardView(timeCardData);
-                        
-                        if (currentPunch.OutTime.Value.Subtract(currentPunch.InTime).TotalMinutes < 1) // punch was shorter than a minut.
-                        {
-                            db.Punches.Remove(currentPunch);
-                            retVal.lines.Add(new TimeCardView() // Make the last line show, but mark is as rapid since it won't get put in the DB
-                            {
-                                DateText = currentPunch.InTime.ToString(@"MM\/dd\/yy"),
-                                InText = currentPunch.InTime.ToString(@"hh\:mm"),
-                                OutText = currentPunch.OutTime.Value.ToString(@"hh\:mm"),
-                                RegularText = "00:00",
-                                OvertimeText = "00:00",
-                                DoubletimeText = "00:00",
-                                isRapid = true
-                            });
-                        }
-                        else // Punch was longer than a minut, we add it to the DB.
-                        {
-                            Calculations.addLines(db, currentPunch);
-                        }
-
-                        db.SaveChanges();
+                        Calculations.addLines(db, currentPunch);
                     }
 
-                    return new HttpResponseMessage<PunchResponse>(retVal);
+                    db.SaveChanges();
                 }
+
+                return new HttpResponseMessage<PunchResponse>(retVal);
+
 
             }
        }
@@ -246,14 +241,13 @@ namespace TimeClock.Controllers
         [HttpPost]
         public HttpResponseMessage MessageViewed(MessageRead request)
         {
-            using (var db = new TimeClockContext())
-            {
-                MessageViewed temp = db.MessagesViewed.SingleOrDefault(mv => mv.EmployeeID.Equals(request.employeeID) && mv.MessageID.Equals(request.messageID));
+            
+            MessageViewed temp = db.MessagesViewed.SingleOrDefault(mv => mv.EmployeeID.Equals(request.employeeID) && mv.MessageID.Equals(request.messageID));
 
-                temp.DateViewed = request.time;
+            temp.DateViewed = request.time;
 
-                return new HttpResponseMessage(HttpStatusCode.Created);
-            }
+            return new HttpResponseMessage(HttpStatusCode.Created);
+            
         }
 
 
@@ -262,111 +256,107 @@ namespace TimeClock.Controllers
         public HttpResponseMessage<MessagesResponse> GetMessages(string id)
 
         {
-            using (var db = new TimeClockContext())
+           
+            Employee emp = db.Employees.SingleOrDefault(e => e.EmployeeID.Equals(id));
+
+            var messages = emp.Messages;
+            messages.OrderBy(m => m.DateCreated);
+
+            List<Messages> returnMessages = new List<Messages>();
+
+            foreach(Message mes in messages)
             {
-                Employee emp = db.Employees.SingleOrDefault(e => e.EmployeeID.Equals(id));
+                bool isViewed = true;
 
-                var messages = emp.Messages;
-                messages.OrderBy(m => m.DateCreated);
+                MessageViewed tempMV = db.MessagesViewed.SingleOrDefault(mv => mv.EmployeeID.Equals(id) && mv.MessageID.Equals(mes.MessageID));
 
-                List<Messages> returnMessages = new List<Messages>();
+                if(tempMV != null && !tempMV.DateViewed.HasValue)
+                    isViewed = false;
 
-                foreach(Message mes in messages)
+                Messages temp = new Messages() 
                 {
-                    bool isViewed = true;
+                    MessageID = mes.MessageID.ToString(),
+                    Date = mes.DateCreated.ToString(@"MM\/dd\/yy"),
+                    From = mes.Manager.FirstName + " " +  mes.Manager.LastName,
+                    Subject = mes.Subject,
+                    isViewed = isViewed
+                };
 
-                    MessageViewed tempMV = db.MessagesViewed.SingleOrDefault(mv => mv.EmployeeID.Equals(id) && mv.MessageID.Equals(mes.MessageID));
-
-                    if(tempMV != null && !tempMV.DateViewed.HasValue)
-                        isViewed = false;
-
-                    Messages temp = new Messages() 
-                    {
-                        MessageID = mes.MessageID.ToString(),
-                        Date = mes.DateCreated.ToString(@"MM\/dd\/yy"),
-                        From = mes.Manager.FirstName + " " +  mes.Manager.LastName,
-                        Subject = mes.Subject,
-                        isViewed = isViewed
-                    };
-
-                    returnMessages.Add(temp);
-                }
-                return new HttpResponseMessage<MessagesResponse>(new MessagesResponse() { messages = returnMessages });
+                returnMessages.Add(temp);
             }
+            return new HttpResponseMessage<MessagesResponse>(new MessagesResponse() { messages = returnMessages });
+            
         }
 
         // Get the details of a specific message for an employee.
         public HttpResponseMessage<MessageData> GetMessageDetails(int id, String empId)
         {
-            using (var db = new TimeClockContext())
+            
+            Message mes = db.Messages.SingleOrDefault(m => m.MessageID == id);
+            Employee emp = db.Employees.SingleOrDefault(e => e.EmployeeID == empId);
+
+            MessageData retVal = new MessageData()
             {
-                Message mes = db.Messages.SingleOrDefault(m => m.MessageID == id);
-                Employee emp = db.Employees.SingleOrDefault(e => e.EmployeeID == empId);
+                Date = mes.DateCreated.ToString(@"MM\/dd\/yy"),
+                Subject = mes.Subject,
+                From = mes.Manager.FirstName + " " + mes.Manager.LastName,
+                To = emp.FirstName + " " + emp.LastName,
+                Message = mes.Body
+            };
 
-                MessageData retVal = new MessageData()
-                {
-                    Date = mes.DateCreated.ToString(@"MM\/dd\/yy"),
-                    Subject = mes.Subject,
-                    From = mes.Manager.FirstName + " " + mes.Manager.LastName,
-                    To = emp.FirstName + " " + emp.LastName,
-                    Message = mes.Body
-                };
-
-                return new HttpResponseMessage<MessageData>(retVal);
-            }
+            return new HttpResponseMessage<MessageData>(retVal);
+            
         }
 
         //Get a list of time cards for an employee
         public HttpResponseMessage<HistoryResponse> GetTimeCardHistory(string id)
         {
-            using (var db = new TimeClockContext())
+           
+            var timecards = db.Timecards.Where(tc => tc.EmployeeID.Equals(id));
+            timecards.OrderBy(tc => tc.PayPeriod);
+
+            int i = 1;
+            List<TimeCardData> retVal = new List<TimeCardData>();
+
+            foreach (Timecard timec in timecards)
             {
-                var timecards = db.Timecards.Where(tc => tc.EmployeeID.Equals(id));
-                timecards.OrderBy(tc => tc.PayPeriod);
-
-                int i = 1;
-                List<TimeCardData> retVal = new List<TimeCardData>();
-
-                foreach (Timecard timec in timecards)
+                TimeCardData temp = new TimeCardData()
                 {
-                    TimeCardData temp = new TimeCardData()
-                    {
-                        LineNumber = i.ToString(),
-                        StartDate = timec.PayPeriod.ToString(@"MM\/dd\/yy"),
-                        EndDate = timec.PayPeriod.AddDays(timec.Employee.department.PayPeriodInterval - 1).ToString(@"MM\/dd\/yy"),
-                        TimecardID = timec.TimecardID
-                    };
+                    LineNumber = i.ToString(),
+                    StartDate = timec.PayPeriod.ToString(@"MM\/dd\/yy"),
+                    EndDate = timec.PayPeriod.AddDays(timec.Employee.department.PayPeriodInterval - 1).ToString(@"MM\/dd\/yy"),
+                    TimecardID = timec.TimecardID
+                };
 
-                    retVal.Add(temp);
-                }
-
-                return new HttpResponseMessage<HistoryResponse>(new HistoryResponse() { payPeriods = retVal });
+                retVal.Add(temp);
             }
+
+            return new HttpResponseMessage<HistoryResponse>(new HistoryResponse() { payPeriods = retVal });
+            
         }
 
         //Should return identical to time card lines
         public HttpResponseMessage<PunchResponse> GetTimeCardDetails(string empId, int tcId = -1)
         {
-            using (var db = new TimeClockContext())
+            
+            if (tcId == -1)
             {
-                if (tcId == -1)
-                {
-                    var emp = db.Employees.SingleOrDefault(e => e.EmployeeID == empId);
-                    var payPeriod = PayPeriodTools.LookupPayPeriod(db, emp.DepartmentID);
-                    var tcLookup = emp.Timecards.SingleOrDefault(tc => tc.PayPeriod == payPeriod.Start);
-                    tcId = tcLookup.TimecardID;
-                }
-                
-                Timecard curTimeCard = db.Timecards.SingleOrDefault(tc => tc.TimecardID == tcId);
-
-                var timeCardData = db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart).ToList();
-
-                var lines = TimeCardView.LinesToTimeCardView(timeCardData);
-
-                PunchResponse ret = new PunchResponse() { lines = lines };
-
-                return new HttpResponseMessage<PunchResponse>(ret);
+                var emp = db.Employees.SingleOrDefault(e => e.EmployeeID == empId);
+                var payPeriod = PayPeriodTools.LookupPayPeriod(db, emp.DepartmentID);
+                var tcLookup = emp.Timecards.SingleOrDefault(tc => tc.PayPeriod == payPeriod.Start);
+                tcId = tcLookup.TimecardID;
             }
+                
+            Timecard curTimeCard = db.Timecards.SingleOrDefault(tc => tc.TimecardID == tcId);
+
+            var timeCardData = db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart).ToList();
+
+            var lines = TimeCardView.LinesToTimeCardView(timeCardData);
+
+            PunchResponse ret = new PunchResponse() { lines = lines };
+
+            return new HttpResponseMessage<PunchResponse>(ret);
+            
         }
     }
 }
