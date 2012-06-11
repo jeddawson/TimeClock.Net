@@ -36,16 +36,16 @@
     <!-- ko with: employeeData -->
     <ul class="nav-bar">
         <li>
-            <a href="#" class="main">Time Card</a>
+            <a href="#:timeCard" class="main" data-bind="click: $root.loadTimeCard">Time Card</a>
         </li>
         <li>
-            <a href="#" class="main">Messages</a>
+            <a href="#:messages" class="main" data-bind="click: $root.loadMessages">Messages</a>
         </li>
         <li>
-            <a href="#" class="main">History</a>
+            <a href="#:history" class="main" data-bind="click: $root.loadHistory">History</a>
         </li>
         <li>
-            <a href="#" class="main">Log Out</a>
+            <a href="#:logout" class="main" data-bind="click: $root.doLogOut">Log Out</a>
         </li>
     </ul>
     <table data-bind="with: $root.timecardData">
@@ -59,6 +59,35 @@
                 <td data-bind="text: RegularText"></td>
                 <td data-bind="text: OvertimeText"></td>
             </tr>
+        </tbody>
+    </table>
+    <table data-bind="with: $root.messageData">
+        <thead><tr><th>Date</th><th>From</th><th>Subject</th></tr></thead>
+        <tbody data-bind="foreach: messages">
+            <tr data-bind="click: $root.goToMessage">
+                <td data-bind="text: Date"></td>
+                <td data-bind="text: From"></td>
+                <td data-bind="text: Subject"></td>
+            </tr>     
+        </tbody>
+    </table>
+    <div class="viewMail" data-bind="with: chosenMessageData">
+        <div class="messageInfo">
+            <h1 data-bind="text: Subject"></h1>
+            <p><label>From</label>: <span data-bind="text: From"></span></p>
+            <p><label>To</label>: <span data-bind="text: To"></span></p>
+            <p><label>Date</label>: <span data-bind="text: Date"></span></p>
+        </div>
+        <p class="message" data-bind="html: messageContent" />
+    </div>
+    <table data-bind="with: $root.historyData">
+        <thead><tr><th>Pay Period</th><th>First Day</th><th>Last Day</th></tr></thead>
+        <tbody data-bind="foreach: payPeriods">
+            <tr data-bind="click: $root.goToTimeCard">
+                <td data-bind="text: Period"></td>
+                <td data-bind="text: Start"></td>
+                <td data-bind="text: End"></td>
+            </tr>     
         </tbody>
     </table>
     <!-- /ko --> 
@@ -88,6 +117,7 @@
         self.employeeData   =   ko.observable();
         self.timecardData   =   ko.observable();
         self.messageData    =   ko.observable();
+        self.chosenMessageData = ko.observable();
         self.historyData    =   ko.observable();
         self.settingData    =   ko.observable();
 
@@ -139,6 +169,23 @@
             });
         };
         
+
+        self.loadTimeCard = function() {
+
+        };
+
+        self.loadMessages = function() {
+
+        };
+
+        self.loadHistory = function() {
+
+        };
+
+        self.doLogOut = function () {
+            window.location.reload();
+        };
+
         //When the internal value of selected employee changes, check the employee's status
         self.selectedEmployeeValue.subscribe(function() {
             if(self.selectedEmployeeValue() != undefined) {

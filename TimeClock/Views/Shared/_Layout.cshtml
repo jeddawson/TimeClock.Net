@@ -27,8 +27,6 @@
             @Html.ActionLink("Time Clock Web App", "Index", "Timeclock")
             <ul class="right">
                     <li>@Html.ActionLink("Manage", "Index", "Employee")</li>
-                    <li>@Html.ActionLink("Status", "Index", "Status")</li>
-                        <li>@Html.ActionLink("Users", "Index", "Account")</li>
                 @Html.Partial("_LoginPartial")
             </ul>
         </div>
@@ -41,14 +39,7 @@
     <!-- Content END -->
     <!-- Footer START -->
     <hr />
-	<div class="row">
-        <div class="eight columns">
-        <p>&copy; @DateTime.Now.Year - James Dawson & Mikkel Kringelbach</p>
-        </div>
-        <div class="four columns">
-            <p>Version: @typeof(TimeClock.MvcApplication).Assembly.GetName().Version</p>
-        </div>
-	</div>
+    <!-- Copywrite @DateTime.Now.Year - James Dawson & Mikkel Kringelbach -->
     <!-- Footer END -->
 </body>
 </html>
