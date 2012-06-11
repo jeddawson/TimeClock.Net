@@ -268,7 +268,7 @@ namespace TimeClock.Controllers
 
         //pull list of messages needs a response type
 
-        public HttpResponseMessage<IEnumerable<Messages>> GetMessages(string id)
+        public HttpResponseMessage<MessagesResponse> GetMessages(string id)
         {
             using (var db = new TimeClockContext())
             {
@@ -285,12 +285,12 @@ namespace TimeClock.Controllers
 
                     MessageViewed tempMV = db.MessagesViewed.SingleOrDefault(mv => mv.EmployeeID.Equals(id) && mv.MessageID.Equals(mes.MessageID));
 
-                    if(!tempMV.DateViewed.HasValue)
+                    if(tempMV != null && !tempMV.DateViewed.HasValue)
                         isViewed = false;
 
                     Messages temp = new Messages() 
                     {
-                        MessegeID = mes.MessageID.ToString(),
+                        MessageID = mes.MessageID.ToString(),
                         Date = mes.DateCreated.ToString(@"MM\/dd\/yy"),
                         From = mes.Manager.FirstName + " " +  mes.Manager.LastName,
                         Subject = mes.Subject,
@@ -299,9 +299,9 @@ namespace TimeClock.Controllers
 
                     returnMessages.Add(temp);
                 }
-                
 
-                return new HttpResponseMessage<IEnumerable<Messages>>(returnMessages);
+
+                return new HttpResponseMessage<MessagesResponse>(new MessagesResponse() { messages = returnMessages });
             }
             
     /* new two new types messageData and messageList
@@ -332,7 +332,7 @@ namespace TimeClock.Controllers
         }
 
         //Get a list of time cards for an employee
-        public HttpResponseMessage<IEnumerable<TimeCardData>> GetTimeCardHistory(string id)
+        public HttpResponseMessage<HistoryResponse> GetTimeCardHistory(string id)
         {
             using (var db = new TimeClockContext())
             {
@@ -355,24 +355,33 @@ namespace TimeClock.Controllers
                     retVal.Add(temp);
                 }
 
-                return new HttpResponseMessage<IEnumerable<TimeCardData>>(retVal);
+                return new HttpResponseMessage<HistoryResponse>(new HistoryResponse() { payPeriods = retVal });
             }
         }
 
         //Should return identical to time card lines
-        public HttpResponseMessage<IEnumerable<TimeCardView>> GetTimeCardDetails(string empId, int tcId)
+        public HttpResponseMessage<PunchResponse> GetTimeCardDetails(string empId, int tcId = -1)
         {
             //List<TimeCardView>() {}
             using (var db = new TimeClockContext())
             {
+                if (tcId == -1)
+                {
+                    var emp = db.Employees.SingleOrDefault(e => e.EmployeeID == empId);
+                    var payPeriod = PayPeriodTools.LookupPayPeriod(db, emp.DepartmentID);
+                    var tcLookup = emp.Timecards.SingleOrDefault(tc => tc.PayPeriod == payPeriod.Start);
+                    tcId = tcLookup.TimecardID;
+                }
+                
                 Timecard curTimeCard = db.Timecards.SingleOrDefault(tc => tc.TimecardID == tcId);
 
                 var timeCardData = db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart).ToList();
 
                 var lines = TimeCardView.LinesToTimeCardView(timeCardData);
 
+                PunchResponse ret = new PunchResponse() { lines = lines };
 
-                return new HttpResponseMessage<IEnumerable<TimeCardView>>(lines);
+                return new HttpResponseMessage<PunchResponse>(ret);
             }
         }
     }

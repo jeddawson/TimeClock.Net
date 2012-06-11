@@ -36,7 +36,7 @@
     <!-- ko with: employeeData -->
     <ul class="nav-bar">
         <li>
-            <a href="#:timeCard" class="main" data-bind="click: $root.loadTimeCard">Time Card</a>
+            <a href="#:timeCard" class="main" data-bind="click: $root.goToTimeCard">Time Card</a>
         </li>
         <li>
             <a href="#:messages" class="main" data-bind="click: $root.loadMessages">Messages</a>
@@ -65,9 +65,9 @@
         <thead><tr><th>Date</th><th>From</th><th>Subject</th></tr></thead>
         <tbody data-bind="foreach: messages">
             <tr data-bind="click: $root.goToMessage">
-                <td data-bind="text: Date"></td>
-                <td data-bind="text: From"></td>
-                <td data-bind="text: Subject"></td>
+                <td><a href="#" data-bind="text: Date"></a></td>
+                <td><a href="#" data-bind="text: From"></a></td>
+                <td><a href="#" data-bind="text: Subject"></a></td>
             </tr>     
         </tbody>
     </table>
@@ -78,15 +78,15 @@
             <p><label>To</label>: <span data-bind="text: To"></span></p>
             <p><label>Date</label>: <span data-bind="text: Date"></span></p>
         </div>
-        <p class="message" data-bind="html: messageContent" />
+        <p class="message" data-bind="html: Message" />
     </div>
     <table data-bind="with: $root.historyData">
         <thead><tr><th>Pay Period</th><th>First Day</th><th>Last Day</th></tr></thead>
         <tbody data-bind="foreach: payPeriods">
             <tr data-bind="click: $root.goToTimeCard">
-                <td data-bind="text: LineNumber"></td>
-                <td data-bind="text: Start"></td>
-                <td data-bind="text: End"></td>
+                <td><a href="#" data-bind="text: LineNumber"></a></td>
+                <td><a href="#" data-bind="text: StartDate"></a></td>
+                <td><a href="#" data-bind="text: EndDate"></a></td>
             </tr>     
         </tbody>
     </table>
@@ -175,12 +175,36 @@
         };
 
         self.loadMessages = function() {
-            self.employeeData(null);
+            self.historyData(null);
+            self.timecardData(null)
+            self.chosenMessageData(null);
             $.get("/REST/clock/GetMessages/" + self.selectedEmployeeValue(), {} , self.messageData);
         };
 
-        self.loadHistory = function() {
+        self.goToMessage = function() {
+            self.messageData(null);
+            $.get("/REST/clock/GetMessageDetails?empId=" + self.selectedEmployeeValue()+"&id=" + this.MessageID,
+            {} , self.chosenMessageData);
+           
+        }
 
+        self.loadHistory = function() {
+            self.timecardData(null);
+            self.messageData(null);
+            self.chosenMessageData(null);
+            $.get("/REST/clock/GetTimeCardHistory/" + self.selectedEmployeeValue(), {} , self.historyData);
+        };
+
+        self.goToTimeCard = function() {
+            self.historyData(null);
+            self.messageData(null);
+            self.chosenMessageData(null);
+            if(this.TimecardID == undefined)
+                $.get("/REST/clock/GetTimeCardDetails?empId=" + self.selectedEmployeeValue(),
+                    {} , self.timecardData);
+            else
+                $.get("/REST/clock/GetTimeCardDetails?empId=" + self.selectedEmployeeValue()+"&tcId=" + this.TimecardID,
+                    {} , self.timecardData);
         };
 
         self.doLogOut = function () {

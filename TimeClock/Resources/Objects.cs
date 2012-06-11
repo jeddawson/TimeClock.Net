@@ -178,11 +178,21 @@ namespace TimeClock.Resources
 
      public class Messages
      {
-         public String MessegeID { get; set; }
+         public String MessageID { get; set; }
          public String Date { get; set; }
          public String From { get; set; }
          public String Subject { get; set; }
          public bool isViewed { get; set; }
+     }
+
+     public class MessagesResponse
+     {
+         public List<Messages> messages { get; set; }
+     }
+
+     public class HistoryResponse
+     {
+         public IEnumerable<TimeCardData> payPeriods { get; set; }
      }
 
      public class MessageData
