@@ -48,7 +48,7 @@
             <a href="#" class="main">Log Out</a>
         </li>
     </ul>
-    <table data-bind="timecardData">
+    <table data-bind="with: $root.timecardData">
         <thead><tr><th>Date</th><th>In</th><th>Out</th><th>Entry</th><th>Regular</th><th>Overtime</th></tr></thead>
         <tbody data-bind="foreach: lines">
             <tr>
@@ -124,14 +124,18 @@
         //Does the post back to the server with the employee's ID and pin.
         self.doPunch = function() {
             //$.post('/REST/clock/punch', ko.toJSON({ ID: self.selectedEmployeeValue(), pin: self.employeePin, closesPunch: self.statusData().openPunch }) , self.timecardData);
+            var tempInit = self.initialData();
             self.initialData(null);
-            self.employeeData = ko.observable(self.selectedEmployeeValue());
+            self.employeeData("test");
             $.ajax("/REST/clock/punch", {
                 data:        ko.toJSON({ ID: self.selectedEmployeeValue(), pin: self.employeePin, closesPunch: self.statusData().openPunch }),
                 type:        "post", 
                 contentType: "application/json",
                 success:     self.timecardData ,
-                failure:     function(exception) { alert(exception)  }
+                failure:     function(exception) {
+                    self.initialData(tempInit);
+                    self.employeeData(null);
+                }
             });
         };
         
