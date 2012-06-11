@@ -158,6 +158,17 @@ namespace TimeClock.Controllers
                 }
                 else
                 {
+                    var payPeriod = PayPeriodTools.LookupPayPeriod(db, emp.DepartmentID);
+                    var curTimeCard = emp.Timecards.SingleOrDefault(tc => tc.PayPeriod == payPeriod.Start);
+
+                    PunchResponse retVal = new PunchResponse()
+                    {
+                        isSuccess = true,
+                        pinError = "",
+                        generalError = null
+                    };
+
+
                     if (request.closesPunch == -1)  // Create a new punch in the DB
                     {
                         Punch temp = new Punch()
@@ -172,6 +183,21 @@ namespace TimeClock.Controllers
 
                         db.Punches.Add(temp);
                         db.SaveChanges();
+
+                        var timeCardData = new List<TimeCardView>();
+                        timeCardData.Add(new TimeCardView()
+                        {
+                            DateText = DateTime.Now.ToString(@"MM\/dd\/yy"),
+                            InText = temp.InTime.ToString(@"hh\:mm"),
+                            OutText = "",
+                            RegularText = "",
+                            OvertimeText = "",
+                            DoubletimeText = ""
+                        });
+
+                        retVal.lines = timeCardData;
+                        
+
                     }
                     else // We need to close the last punch and make lines -- Make it split the lines over the payperiod seed
                     {
@@ -186,26 +212,25 @@ namespace TimeClock.Controllers
 
 
                         Calculations.addLines(db, currentPunch);
-                                  
 
-                        }
+                        var timeCardData = db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart).ToList();
 
+                        retVal.lines = TimeCardView.LinesToTimeCardView(timeCardData);
+                        
                     }
 
+                    /*
+                    PunchResponse retVal = new PunchResponse()
+                    {
+                        isSuccess = true,
+                        pinError = "",
+                        lines = TimeCardView.LinesToTimeCardView(timeCardData),
+                        generalError = null
+                    };
+                    */
+                    return new HttpResponseMessage<PunchResponse>(retVal);
+                }
 
-                var payPeriod = PayPeriodTools.LookupPayPeriod(db, emp.DepartmentID);
-                var curTimeCard = emp.Timecards.SingleOrDefault(tc => tc.PayPeriod == payPeriod.Start);
-                var timeCardData = db.Lines.Where(l => l.TimecardID == curTimeCard.TimecardID).OrderBy(l => l.SplitStart);
-
-                PunchResponse retVal = new PunchResponse()
-                {
-                    isSuccess = true,
-                    pinError = "",
-                    lines = TimeCardView.LinesToTimeCardView(timeCardData),
-                    generalError = null
-                };
-                 
-                return new HttpResponseMessage<PunchResponse>(retVal);
             }
        }
         
