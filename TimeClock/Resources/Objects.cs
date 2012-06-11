@@ -175,4 +175,31 @@ namespace TimeClock.Resources
          }
 
      }
+
+     public class Messages
+     {
+         public String MessegeID { get; set; }
+         public String Date { get; set; }
+         public String From { get; set; }
+         public String Subject { get; set; }
+         public bool isViewed { get; set; }
+     }
+
+     public class MessageData
+     {
+         public String Subject { get; set; }
+         public String From { get; set; }
+         public String To { get; set; }
+         public String Date { get; set; }
+         public String Message { get; set; }
+         public bool isviewed { get; set; }
+     }
+
+     public class TimeCardData
+     {
+         public String LineNumber { get; set; }
+         public String StartDate { get; set; }
+         public String EndDate { get; set; }
+         public int TimecardID { get; set; }
+     }
 }
