@@ -122,7 +122,7 @@ namespace TimeClock.Resources
          private String parseDoubleToHoursMinutes(double time)
          {
              String hours = ((int) time / 60).ToString();
-             String minutes = Math.Round(time % 60, 0).ToString();
+             String minutes = Math.Ceiling(time % 60).ToString();
 
              return hours + ":" + minutes;
          }
