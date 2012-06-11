@@ -375,6 +375,7 @@ namespace TimeClock.Models
         public int      WeeklyMax       { get; set; }
         public int      SeventhDayMax   { get; set; }
         public string   Description     { get; set; }
+        public string ExportValue { get; set; }
         
         /* One to One */
         public virtual PayType NextPayType { get; set; }
@@ -450,6 +451,12 @@ namespace TimeClock.Models
         public TimeSpan getDuration() 
         {
             return SplitEnd.Subtract(SplitStart);
+        }
+
+
+        public double getMinutDuration()
+        {
+            return getDuration().TotalMinutes;
         }
 
     }
