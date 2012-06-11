@@ -114,8 +114,8 @@ namespace TimeClock.Resources
              InText = In.ToString(@"hh\:mm");
              OutText = Out.ToString(@"hh\:mm");
              EntryText = Entry.ToString(@"hh\:mm");
-             RegularText = Regular.ToString(@"hh\:mm");
-             OvertimeText = Overtime.ToString(@"hh\:mm");
+             RegularText = TimeSpan.FromMinutes(Regular).ToString(@"hh\:mm");
+             OvertimeText = Overtime.ToString();
              DoubletimeText = Doubletime.ToString(@"hh\:mm");
          }
 
