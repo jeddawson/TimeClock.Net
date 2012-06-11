@@ -207,17 +207,15 @@ namespace TimeClock.Resources
            }
                // we can safely add the line to the DB
            else 
-           {
-               Line line = new Line()
+           { 
+               db.Lines.Add(new Line()
                     {
                         TimecardID = tc.TimecardID,
                         PunchID = punch.PunchID,
                         SplitStart = splitStart,
                         SplitEnd = splitEnd,
                         PayTypeID = pt.PayTypeID
-                    };
-
-               db.Lines.Add(line);
+                    });
                db.SaveChanges();
              
            }
