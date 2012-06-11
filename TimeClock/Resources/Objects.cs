@@ -41,8 +41,9 @@ namespace TimeClock.Resources
          public enum PunchTypes { REGULAR, HOLIDAY, SICK, VACATION }
          public PunchTypes PunchType { get; set; }
          public int PunchID { get; set; }
+         public bool isRapid { get; set; }
 
-         public static IEnumerable<TimeCardView> LinesToTimeCardView(IEnumerable<Line> tcLines)
+         public static List<TimeCardView> LinesToTimeCardView(IEnumerable<Line> tcLines)
          {
              List<TimeCardView> view = new List<TimeCardView>();
              int i = 0;
@@ -97,7 +98,7 @@ namespace TimeClock.Resources
                      Doubletime = doubletime,
                      PunchType = pType,
                      PunchID = line.PunchID,
-
+                     isRapid = false;
                  };
 
                  single.generateText();
@@ -105,7 +106,7 @@ namespace TimeClock.Resources
                  view.Add(single);
              }
 
-             return view.AsEnumerable();
+             return view;
          }
 
          private void generateText()
