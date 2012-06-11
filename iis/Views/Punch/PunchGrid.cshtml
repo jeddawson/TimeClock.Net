@@ -1,0 +1,29 @@
+﻿@model IEnumerable<TimeClock.Resources.TimeCardView>
+
+@foreach (var item in Model) {
+    <tr data-pkey="@item.PunchID">
+        <td>
+             @Html.DisplayFor(modelItem => item.Date)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.In)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Out)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Entry)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Regular)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Overtime)
+        </td>
+        <!-->  Color code base on item.PunchType <-->
+        <td class="rowControl hidden"> 
+            <a href="#makeRowEditable" class="makeRowEditable">Edit</a> |
+            <a href="#deleteRow" class="deleteRow">Delete</a>
+        </td>
+    </tr>
+}
