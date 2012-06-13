@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
+using System.Data.Objects;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -16,22 +18,36 @@ namespace TimeClock.Controllers
         //
         // GET: /Message/
 
-        public ActionResult Index()
+        public ViewResult Index(int start = 0, int itemsPerPage = 20, string orderBy = "MessageID", bool desc = false)
         {
-            return View(db.Messages.ToList());
+            ViewBag.Count = db.Messages.Count();
+            ViewBag.Start = start;
+            ViewBag.ItemsPerPage = itemsPerPage;
+            ViewBag.OrderBy = orderBy;
+            ViewBag.Desc = desc;
+
+            return View();
         }
 
         //
-        // GET: /Message/Details/5
+        // GET: /Message/GridData/?start=0&itemsPerPage=20&orderBy=MessageID&desc=true
 
-        public ActionResult Details(int id = 0)
+        public ActionResult GridData(int start = 0, int itemsPerPage = 20, string orderBy = "MessageID", bool desc = false)
+        {
+            Response.AppendHeader("X-Total-Row-Count", db.Messages.Count().ToString());
+            ObjectQuery<Message> messages = (db as IObjectContextAdapter).ObjectContext.CreateObjectSet<Message>();
+            messages = messages.OrderBy("it." + orderBy + (desc ? " desc" : ""));
+
+            return PartialView(messages.Skip(start).Take(itemsPerPage));
+        }
+
+        //
+        // GET: /Default5/RowData/5
+
+        public ActionResult RowData(int id)
         {
             Message message = db.Messages.Find(id);
-            if (message == null)
-            {
-                return HttpNotFound();
-            }
-            return View(message);
+            return PartialView("GridData", new Message[] { message });
         }
 
         //
@@ -39,7 +55,7 @@ namespace TimeClock.Controllers
 
         public ActionResult Create()
         {
-            return View();
+            return PartialView("Edit");
         }
 
         //
@@ -52,23 +68,19 @@ namespace TimeClock.Controllers
             {
                 db.Messages.Add(message);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return PartialView("GridData", new Message[] { message });
             }
 
-            return View(message);
+            return PartialView("Edit", message);
         }
 
         //
         // GET: /Message/Edit/5
 
-        public ActionResult Edit(int id = 0)
+        public ActionResult Edit(int id)
         {
             Message message = db.Messages.Find(id);
-            if (message == null)
-            {
-                return HttpNotFound();
-            }
-            return View(message);
+            return PartialView(message);
         }
 
         //
@@ -81,34 +93,21 @@ namespace TimeClock.Controllers
             {
                 db.Entry(message).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return PartialView("GridData", new Message[] { message });
             }
-            return View(message);
-        }
 
-        //
-        // GET: /Message/Delete/5
-
-        public ActionResult Delete(int id = 0)
-        {
-            Message message = db.Messages.Find(id);
-            if (message == null)
-            {
-                return HttpNotFound();
-            }
-            return View(message);
+            return PartialView(message);
         }
 
         //
         // POST: /Message/Delete/5
 
-        [HttpPost, ActionName("Delete")]
-        public ActionResult DeleteConfirmed(int id)
+        [HttpPost]
+        public void Delete(int id)
         {
             Message message = db.Messages.Find(id);
             db.Messages.Remove(message);
             db.SaveChanges();
-            return RedirectToAction("Index");
         }
 
         protected override void Dispose(bool disposing)

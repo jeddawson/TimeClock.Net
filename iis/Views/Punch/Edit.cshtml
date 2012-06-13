@@ -1,0 +1,33 @@
+﻿@model TimeClock.Models.Punch
+
+<tr @if (Model != null) {
+    @:data-pkey="@Model.PunchID"
+}>
+    <td>
+        @Html.EditorFor(model => model.InTime)
+        @Html.ValidationMessageFor(model => model.InTime)
+    </td>
+    <td>
+        @Html.EditorFor(model => model.OutTime)
+        @Html.ValidationMessageFor(model => model.OutTime)
+    </td>
+    <td>
+        @Html.EditorFor(model => model.DepartmentID)
+        @Html.ValidationMessageFor(model => model.DepartmentID)
+    </td>
+    <td>
+        @Html.DropDownList("EmployeeID", String.Empty)
+        @Html.ValidationMessageFor(model => model.EmployeeID)
+    </td>
+    <td>
+        @Html.EditorFor(model => model.PunchTypeID)
+        @Html.ValidationMessageFor(model => model.PunchTypeID)
+    </td>
+    <td>
+@if (ViewContext.RouteData.Values["Action"].ToString() == "Edit") {
+        <button class="editRow">Save</button><button class="cancelEditRow">Cancel</button>
+} else {
+        <button class="createRow">Create</button><button class="cancelCreateRow">Cancel</button>
+}
+    </td>
+</tr>

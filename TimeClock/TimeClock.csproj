@@ -358,6 +358,9 @@
     <Content Include="Views\Department\GridData.cshtml" />
     <Content Include="Views\Punch\Index.cshtml" />
     <Content Include="Views\Punch\PunchGrid.cshtml" />
+    <Content Include="Views\Message\GridData.cshtml" />
+    <Content Include="Views\Punch\GridData.cshtml" />
+    <Content Include="Views\Punch\Edit.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

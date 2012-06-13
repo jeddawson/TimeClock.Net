@@ -1,0 +1,25 @@
+﻿@model IEnumerable<TimeClock.Models.Punch>
+
+@foreach (var item in Model) {
+    <tr data-pkey="@item.PunchID">
+        <td>
+            @Html.DisplayFor(modelItem => item.InTime)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.OutTime)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DepartmentID)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.employee.FirstName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PunchTypeID)
+        </td>
+        <td class="rowControl hidden">
+            <a href="#makeRowEditable" class="makeRowEditable">Edit</a> |
+            <a href="#deleteRow" class="deleteRow">Delete</a>
+        </td>
+    </tr>
+}
